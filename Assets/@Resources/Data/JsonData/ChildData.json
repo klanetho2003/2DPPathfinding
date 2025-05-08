@@ -1,0 +1,31 @@
+﻿{
+  "Childs": [
+    {
+      "TempIntData": -1,
+      "TempStringData": "예시 Data",
+      "TempListData": [
+        {
+          "Value_1": 1711,
+          "ObjectTemplateId": 30
+        },
+        {
+          "Value_1": 18912,
+          "ObjectTemplateId": 20
+        },
+        {
+          "Value_1": 30,
+          "ObjectTemplateId": 3
+        },
+        {
+          "Value_1": 20,
+          "ObjectTemplateId": 6
+        },
+        {
+          "Value_1": 0,
+          "ObjectTemplateId": 0
+        }
+      ],
+      "TemplateId": 0
+    }
+  ]
+}
