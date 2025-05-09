@@ -15,7 +15,7 @@ public class InputManager
     // 콜백
     public event Action<KeyDownEvent, KeyInputType> OnKeyInputHandler;
 
-    // 설정값
+    // 설정값 -> Game에 따라 수정 필요
     private const float _holdThreshold = 0.5f;
     private const float _doubleTapThreshold = 0.25f;
 
@@ -28,6 +28,7 @@ public class InputManager
     public void OnUpdate()
     {
         HandleMoveInput();
+        CheckHoldInputs();
     }
 
     public void Dispose()
@@ -37,8 +38,7 @@ public class InputManager
             action.Disable();
     }
 
-    #region === Initialization ===
-
+    #region Init
     private void InitMove()
     {
         _moveAction = new InputAction("Move", InputActionType.Value);
@@ -70,48 +70,51 @@ public class InputManager
             if (_lastPressedTime.TryGetValue(evt, out float lastTime))
             {
                 if (now - lastTime <= _doubleTapThreshold)
+                {
+                    Debug.Log($"{evt} , {KeyInputType.DoubleTap}");
                     OnKeyInputHandler?.Invoke(evt, KeyInputType.DoubleTap);
+                }   
             }
 
             _lastPressedTime[evt] = now;
-            _isHolding[evt] = true;
+            _isHolding[evt] = true; // Hold Trigger
 
+            Debug.Log($"{evt} , {KeyInputType.Down}");
             OnKeyInputHandler?.Invoke(evt, KeyInputType.Down);
         };
 
         action.canceled += ctx =>
         {
             _isHolding[evt] = false;
+            Debug.Log($"{evt} , {KeyInputType.Up}");
             OnKeyInputHandler?.Invoke(evt, KeyInputType.Up);
         };
 
         action.Enable();
         _keyBindings[evt] = action;
     }
-
     #endregion
 
-    #region === Hold 체크 ===
-
+    #region Hold Check
     private void CheckHoldInputs()
     {
         float now = Time.time;
-        foreach (var pair in _isHolding)
-        {
-            if (pair.Value == false) continue;
 
-            var evt = pair.Key;
-            float pressedTime = _lastPressedTime.ContainsKey(evt) ? _lastPressedTime[evt] : -1f;
-            if (pressedTime < 0f) continue;
+        // Dictionary를 안전하게 순회하기 위해 Key snapshot을 만든다
+        var holdingKeys = new List<KeyDownEvent>(_isHolding.Keys);
+
+        foreach (var evt in holdingKeys)
+        {
+            if (_isHolding[evt] == false) continue;
+            if (!_lastPressedTime.TryGetValue(evt, out float pressedTime)) continue;
 
             if (now - pressedTime >= _holdThreshold)
             {
-                _isHolding[evt] = false; // 1회만 호출
+                _isHolding[evt] = false; // 안전하게 수정 가능
                 OnKeyInputHandler?.Invoke(evt, KeyInputType.Hold);
             }
         }
     }
-
     #endregion
 
     #region Move Handling
