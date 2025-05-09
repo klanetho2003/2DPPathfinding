@@ -285,6 +285,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cd3502c6a4356424b8bc05958359decd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  ON_GIZMO: 0
   nodeSize: 0.2
   drawJumpRadius: 0
   jumpRadius: 5

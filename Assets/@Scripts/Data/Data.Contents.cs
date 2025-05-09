@@ -42,4 +42,41 @@ namespace Data
         }
     }
     #endregion
+
+    [Serializable]
+    public class CreatureData
+    {
+        public int TemplateId;
+        public string NameDataId;
+
+        public string AnimDataId;
+        public string SortingLayerName;
+
+        public float ColliderOffsetX;
+        public float ColliderOffsetY;
+        public float ColliderSizeX;
+        public float ColliderSizeY;
+
+        public float MaxHp;
+        public float MoveSpeed;
+    }
+
+    [Serializable]
+    public class PlayerData : CreatureData
+    {
+
+    }
+
+    [Serializable]
+    public class PlayerDataLoader : ILoader<int, PlayerData>
+    {
+        public List<PlayerData> PlayersDatas = new List<PlayerData>();
+        public Dictionary<int, PlayerData> MakeDict()
+        {
+            Dictionary<int, PlayerData> dict = new Dictionary<int, PlayerData>();
+            foreach (PlayerData data in PlayersDatas)
+                dict.Add(data.TemplateId, data);
+            return dict;
+        }
+    }
 }

@@ -1,0 +1,16 @@
+﻿{
+  "PlayersDatas": [
+    {
+      "TemplateId": 10,
+      "NameDataId": "WarrierTemp",
+      "AnimDataId": "WarriorAnim",
+      "SortingLayerName": null,
+      "ColliderOffsetX": -0.05,
+      "ColliderOffsetY": 0.85,
+      "ColliderSizeX": 1.0,
+      "ColliderSizeY": 1.8,
+      "MaxHp": 100.0,
+      "MoveSpeed": 5.0
+    }
+  ]
+}

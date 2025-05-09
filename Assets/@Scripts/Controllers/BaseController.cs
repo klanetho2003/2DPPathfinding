@@ -8,12 +8,13 @@ using static Define;
 public class BaseController : InitBase
 {
     public EObjectType ObjectType { get; protected set; } = EObjectType.None;
-    public CircleCollider2D Collider { get; protected set; }
+    public CapsuleCollider2D Collider { get; protected set; }
     public Rigidbody2D RigidBody { get; protected set; }
     public Animator Anim { get; private set; }
     public SpriteRenderer SpriteRenderer { get; private set; }
+    public SortingGroup SortingGroup { get; private set; }
 
-    public float ColliderRadius { get { return (Collider != null) ? Collider.radius : 0.0f; } }
+    public float ColliderRadius { get { return (Collider != null) ? Collider.size.y / 2 : 0.0f; } }
     public Vector3 CenterPosition { get { return transform.position + Vector3.up * ColliderRadius; } }
 
     public int DataTemplateID { get; set; }
@@ -26,6 +27,7 @@ public class BaseController : InitBase
 
         Anim = GetComponent<Animator>();
         SpriteRenderer = GetComponent<SpriteRenderer>();
+        SortingGroup = gameObject.GetOrAddComponent<SortingGroup>();
 
         return true;
     }
@@ -37,13 +39,13 @@ public class BaseController : InitBase
     #endregion
 
     #region Update & FixedUpdate
-    public virtual void UpdateController() { }
+    protected virtual void UpdateController() { }
     void Update()
     {
         UpdateController();
     }
 
-    public virtual void FixedUpdateController() { }
+    protected virtual void FixedUpdateController() { }
     void FixedUpdate()
     {
         FixedUpdateController();
@@ -53,6 +55,66 @@ public class BaseController : InitBase
     #region Animation
     protected virtual void UpdateAnimation() { }
 
+    protected virtual void SetAnimation(string dataLabel, string sortingLayerName, int sortingOrder)
+    {
+        if (Anim == null)
+            return;
+
+        // Animatior
+        if (string.IsNullOrEmpty(dataLabel) == false)
+            Anim.runtimeAnimatorController = Managers.Resource.Load<RuntimeAnimatorController>(dataLabel);
+
+        SortingGroup.sortingLayerName = sortingLayerName;
+        SortingGroup.sortingOrder = sortingOrder;
+    }
+
+    #region Look Helpers
+    bool _lookRight = true;
+    public bool LookRight
+    {
+        get { return _lookRight; }
+        set
+        {
+            _lookRight = value;
+            FlipX(!value);
+        }
+    }
+
+    public virtual void FlipX(bool flag)
+    {
+        if (Anim == null)
+            return;
+
+        // On Sprite Flip
+        SpriteRenderer.flipX = flag;
+    }
+
+    public void LookAtTarget(BaseController target)
+    {
+        Vector3 targetPos = target.transform.position;
+        LookAtTarget(targetPos);
+    }
+
+    public void LookAtTarget(Vector3 targetPos)
+    {
+        Vector2 dir = targetPos - transform.position;
+        LookAtTarget(dir);
+    }
+
+    public void LookAtTarget(Vector2 dir)
+    {
+        if (dir.x < 0)
+            LookRight = true;
+        else
+            LookRight = false;
+    }
+
+    public static Vector3 GetLookAtRotation(Vector3 dir)
+    {
+        float angle = Mathf.Atan2(-dir.x, dir.y) * Mathf.Rad2Deg;
+        return new Vector3(0, 0, angle);
+    }
+    #endregion
 
     #endregion
 

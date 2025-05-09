@@ -124,13 +124,13 @@ public class InputManager
         switch (dir)
         {
             case > 0:
-                Debug.Log("->");
+                Managers.Game.MoveDir = Vector2.right;
                 break;
             case < 0:
-                Debug.Log("<-");
+                Managers.Game.MoveDir = Vector2.left;
                 break;
             default: // 0
-                Debug.Log("None Dir");
+                Managers.Game.MoveDir = Vector2.zero;
                 break;
         }
     }

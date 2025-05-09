@@ -49,7 +49,15 @@ public class Define
     public enum EObjectType
     {
         None,
-        TempType,
+        Player,
+    }
+
+    public enum ECreatureState
+    {
+        None,
+        Idle,
+        Move,
+        Jump,
     }
 
     public enum ETileType
@@ -74,5 +82,11 @@ public class Define
         Dummy1 = 3,
         Water = 4,
         UI = 5,
+    }
+
+    // Hard Coding
+    public static class SortingLayers
+    {
+        public const int CREATURE = 100;
     }
 }

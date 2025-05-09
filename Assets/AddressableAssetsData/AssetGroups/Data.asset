@@ -15,14 +15,14 @@ MonoBehaviour:
   m_GroupName: Data
   m_GUID: b7d01224da6bf96468763cd87eecc497
   m_SerializeEntries:
-  - m_GUID: 1dca896aef8ef32429c82ce6d24f6087
-    m_Address: ChildData
+  - m_GUID: c8100dbb3267b62419b8616e658d4505
+    m_Address: TileHintMapData
     m_ReadOnly: 0
     m_SerializedLabels:
     - PreLoad
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: c8100dbb3267b62419b8616e658d4505
-    m_Address: TileHintMapData
+  - m_GUID: f95b21465e4e64144a74e46d8ce30bf2
+    m_Address: PlayerData
     m_ReadOnly: 0
     m_SerializedLabels:
     - PreLoad

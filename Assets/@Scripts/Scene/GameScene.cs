@@ -17,6 +17,8 @@ public class GameScene : BaseScene
 
         _currnetTileGraph = Managers.Map.LoadMap("BaseMap");
 
+        Managers.Object.Spawn<Player>(Vector3.zero, 10); // 10 -> Player Id
+
         return true;
     }
 

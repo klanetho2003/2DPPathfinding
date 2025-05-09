@@ -8,6 +8,7 @@ using UnityEngine;
 using static Define;
 using Random = UnityEngine.Random;
 
+#region Example Save Data Model
 [Serializable]
 public class GameSaveData
 {
@@ -37,9 +38,11 @@ public enum TempOwningState
     Owned,      // 보유
     Picked,     // 장비 중
 }
+#endregion
 
 public class GameManager
 {
+    #region Example Save
     GameSaveData _saveData = new GameSaveData();
     public GameSaveData SaveData { get { return _saveData; } set { _saveData = value; } }
 
@@ -105,5 +108,19 @@ public class GameManager
 
         Debug.Log($"Save Game Loaded : {Path}");
         return true;
+    }
+    #endregion
+
+    public Action<Vector2> OnMoveDirChanged;
+
+    Vector2 _moveDir;
+    public Vector2 MoveDir
+    {
+        get { return _moveDir; }
+        set
+        {
+            _moveDir = value;
+            OnMoveDirChanged?.Invoke(_moveDir);
+        }
     }
 }
