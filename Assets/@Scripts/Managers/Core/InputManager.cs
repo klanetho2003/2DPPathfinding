@@ -10,11 +10,28 @@ public class InputManager
     {
         if (Input.anyKey == false)
         {
-            // Managers.Game.MoveDir = Vector2.zero;
+            Debug.Log("None Dir");
         }
         else
         {
+            OnDirInput();
             OnKeyInput();
+        }
+    }
+
+    const string DIR = "Horizontal";
+    void OnDirInput()
+    {
+        float horizontalDir = Input.GetAxisRaw(DIR);
+
+        switch (horizontalDir)
+        {
+            case 1:     // Input ->
+                Debug.Log("->");
+                break;
+            case -1:    // Input <-
+                Debug.Log("<-");
+                break;
         }
     }
 
@@ -26,6 +43,7 @@ public class InputManager
         if (Input.GetKeyDown(KeyCode.Space))
         {
             OnKeyDownHandler.Invoke(KeyDownEvent.Space);
+            Debug.Log("Space");
         }
     }
 }
