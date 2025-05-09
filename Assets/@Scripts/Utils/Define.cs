@@ -17,6 +17,14 @@ public class Define
         Space = 100,
     }
 
+    public enum KeyInputType
+    {
+        Down,
+        Up,
+        Hold,
+        DoubleTap
+    }
+
     public enum Sound
     {
         Bgm,

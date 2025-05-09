@@ -55,11 +55,13 @@ public class Managers : MonoBehaviour
 
             // 초기화
             s_instance = go.GetComponent<Managers>();
+
+            s_instance._input.Init();
         }
     }
 
     private void Update()
     {
-        // s_instance._input.OnUpdate();
+        s_instance._input.OnUpdate();
     }
 }
