@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: 49d56dac3c2f8a54b83fe41aa886e945
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 237109
+  packageName: Pixel Art Platformer - Dungeon
+  packageVersion: 1.1.5
+  assetPath: Assets/Cainos/Pixel Art Platformer - Dungeon/Script/Chest.cs
+  uploadId: 705949

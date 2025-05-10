@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: 6e53cd23132de8b479cc3687af81dcaa
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 237109
+  packageName: Pixel Art Platformer - Dungeon
+  packageVersion: 1.1.5
+  assetPath: Assets/Cainos/Pixel Art Platformer - Dungeon/Script/Editor/SwitchEditor.cs
+  uploadId: 705949

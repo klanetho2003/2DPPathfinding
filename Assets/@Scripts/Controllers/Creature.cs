@@ -6,6 +6,10 @@ public class Creature : BaseController
 {
     public CreatureData CreatureData { get; private set; }
 
+    public MoveMentValues MovementValues { get; protected set; }
+
+    public float TargetVelocityX { get; protected set; }
+
     protected Vector2 _moveDir = Vector2.zero;
     public Vector2 MoveDir
     {
@@ -16,6 +20,14 @@ public class Creature : BaseController
 
             UpdateAnimation(); // To Do
         }
+    }
+
+    [SerializeField] // For Debug
+    protected bool _isGrounded = false;
+    public bool IsGrounded
+    {
+        get { return _isGrounded; }
+        protected set { _isGrounded = value; }
     }
 
     [SerializeField] // For Debug
@@ -40,7 +52,8 @@ public class Creature : BaseController
         set { _hp = Mathf.Clamp(value, 0, MaxHp);}
     }
     public float MaxHp { get; set; }
-    public float MoveSpeed { get; set; }
+    public float MaxSpeed { get; set; }
+    public float JumpForce { get; set; }
     #endregion
 
     #region Init & SetInfo
@@ -48,8 +61,6 @@ public class Creature : BaseController
     {
         if (base.Init() == false)
             return false;
-
-        ObjectType = EObjectType.Player;
 
         Collider = GetComponent<CapsuleCollider2D>();
         RigidBody = GetComponent<Rigidbody2D>();
@@ -91,13 +102,20 @@ public class Creature : BaseController
         // Stat
         Hp = CreatureData.MaxHp;
         MaxHp = CreatureData.MaxHp;
-        MoveSpeed = CreatureData.MoveSpeed;
+        MaxSpeed = CreatureData.MaxSpeed;
+        JumpForce = CreatureData.JumpForce;
     }
     #endregion
 
     #region Update
     protected override void UpdateController()
     {
+        // Grounded Check
+        UpdateGrounded();
+
+        // 목표 속도 계산
+        CalculateTargetVelocity();
+
         switch (CreatureState)
         {
             case ECreatureState.Idle:
@@ -113,42 +131,61 @@ public class Creature : BaseController
     }
 
     protected virtual void UpdateIdle() { }
-    protected virtual void UpdateMove() { }
     protected virtual void UpdateJump() { }
+    protected virtual void UpdateMove() { }
 
     protected override void UpdateAnimation() { }
     #endregion
 
-    #region Move
+    #region FixedUpdate & Move Method
     protected override void FixedUpdateController()
     {
-        if (CreatureState != ECreatureState.Move)
-        {
-            SetRigidBodyVelocity(Vector3.zero);
-            return;
-        }
+        // 속도 적용
+        SetRigidBodyVelocity(TargetVelocityX);
 
-        // 좌표 연산 -> 적용
-        Vector3 dest = MoveDir.normalized * MoveSpeed;
-        transform.position = transform.position + (dest * Time.fixedDeltaTime);
+        // 마찰력 부여
+        ApplyGroundFriction();
 
-        SetRigidBodyVelocity(dest);
+
+        // 좌표 연산
+        /*Vector3 dest = MoveDir.normalized * MoveSpeed;
+        transform.position = transform.position + (dest * Time.fixedDeltaTime);*/
     }
 
-    public virtual void SetRigidBodyVelocity(Vector2 velocity)
+    protected virtual void UpdateGrounded()
     {
-        if (RigidBody == null)
-            return;
+        IsGrounded = Physics2D.Raycast(transform.position, Vector2.down, 1.1f, LayerMask.GetMask("Ground"));
+    }
 
-        RigidBody.linearVelocity = velocity;
+    private float velocityXSmoothing; // 속도 보간 진행 저장용
+    private void CalculateTargetVelocity()
+    {
+        float accelTime = IsGrounded ? MovementValues.groundAccelTime : MovementValues.airAccelTime;
+        float targetSpeed = MoveDir.x * MaxSpeed;
+        TargetVelocityX = Mathf.SmoothDamp(RigidBody.linearVelocityX, targetSpeed, ref velocityXSmoothing, accelTime);
+    }
 
+    public virtual void SetRigidBodyVelocity(float velocity)
+    {
         if (CreatureState != ECreatureState.Move)
             return;
 
-        if (velocity.x < 0)
+        RigidBody.linearVelocity = new Vector2(velocity, RigidBody.linearVelocityY);
+
+        if (velocity < 0)
             LookRight = false;
-        else if (velocity.x > 0)
+        else if (velocity > 0)
             LookRight = true;
+    }
+
+    protected void ApplyGroundFriction()
+    {
+        if (CreatureState == ECreatureState.Move)
+            return;
+        if (!IsGrounded || Mathf.Approximately(MoveDir.x, 0f) == false)
+            return;
+
+        RigidBody.linearVelocity = new Vector2(RigidBody.linearVelocityX * MovementValues.groundFriction, RigidBody.linearVelocityY);
     }
     #endregion
 }

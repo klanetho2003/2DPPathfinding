@@ -9,8 +9,12 @@ public class Player : Creature
         if (base.Init() == false)
             return false;
 
+        ObjectType = EObjectType.Player;
+
         Managers.Game.OnMoveDirChanged -= HandleOnMoveDirChange;
         Managers.Game.OnMoveDirChanged += HandleOnMoveDirChange;
+
+        MovementValues = Managers.Resource.Load<MoveMentValues>($"MoveMentValues_{ObjectType}");
 
         return true;
     }
@@ -19,7 +23,7 @@ public class Player : Creature
     {
         base.SetInfo(templateID);
 
-        Debug.Log($"CenterPosition -> {CenterPosition}");
+        Managers.Input.OnKeyInputHandler += HandleOnKeyInputHandler;
     }
     #endregion
 
@@ -27,6 +31,25 @@ public class Player : Creature
     void HandleOnMoveDirChange(Vector2 dir)
     {
         MoveDir = dir;
+    }
+
+    void HandleOnKeyInputHandler(KeyDownEvent key, KeyInputType inputType)
+    {
+        switch (inputType)
+        {
+            case KeyInputType.Down:
+                {
+                    if (key == KeyDownEvent.Space)
+                        DoJump(Vector2.up, false);
+                }
+                break;
+            case KeyInputType.Up:
+                break;
+            case KeyInputType.Hold:
+                break;
+            case KeyInputType.DoubleTap:
+                break;
+        }
     }
     #endregion
 
@@ -38,7 +61,7 @@ public class Player : Creature
                 Anim.Play("Idle");
                 break;
             case ECreatureState.Move:
-                Anim.Play("Move");
+                Anim.Play("Run");
                 break;
             case ECreatureState.Jump:
                 Anim.Play("Jump");
@@ -57,4 +80,10 @@ public class Player : Creature
         if (_moveDir == Vector2.zero) { CreatureState = ECreatureState.Idle; return; }
     }
     #endregion
+
+    private void DoJump(Vector2 dir, bool onWall)
+    {
+        RigidBody.linearVelocity = new Vector2(RigidBody.linearVelocity.x, 0);
+        RigidBody.linearVelocity += dir * JumpForce;
+    }
 }

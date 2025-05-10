@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: e0a6e890fd919487c9db767e6da2b42b
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 237109
+  packageName: Pixel Art Platformer - Dungeon
+  packageVersion: 1.1.5
+  assetPath: Assets/Cainos/Third Party/Lucid Editor/Editor/Attributes/GUIColorAttributeProcessor.cs
+  uploadId: 705949

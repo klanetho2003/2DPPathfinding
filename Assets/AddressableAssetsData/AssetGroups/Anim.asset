@@ -15,8 +15,8 @@ MonoBehaviour:
   m_GroupName: Anim
   m_GUID: 8e9f8240492a06e41bd82f250911347f
   m_SerializeEntries:
-  - m_GUID: 312496b25d842af4a938e96c7d5aaee0
-    m_Address: WarriorAnim
+  - m_GUID: c794c61eb96248f4fbcd054821a369cd
+    m_Address: PlayerAnimator
     m_ReadOnly: 0
     m_SerializedLabels:
     - PreLoad

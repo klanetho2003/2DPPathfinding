@@ -58,7 +58,8 @@ namespace Data
         public float ColliderSizeY;
 
         public float MaxHp;
-        public float MoveSpeed;
+        public float MaxSpeed;
+        public float JumpForce;
     }
 
     [Serializable]

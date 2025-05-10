@@ -1,0 +1,16 @@
+fileFormatVersion: 2
+guid: cd9d07d9deb560b48b1025c7aecd900d
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 11400000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 237109
+  packageName: Pixel Art Platformer - Dungeon
+  packageVersion: 1.1.5
+  assetPath: Assets/Cainos/Pixel Art Platformer - Dungeon/Tileset Pallete/TP Dungeon
+    Ground/TX Tileset - Dungeon Ground_196.asset
+  uploadId: 705949

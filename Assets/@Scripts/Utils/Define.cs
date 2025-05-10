@@ -82,6 +82,7 @@ public class Define
         Dummy1 = 3,
         Water = 4,
         UI = 5,
+        Ground = 6,
     }
 
     // Hard Coding

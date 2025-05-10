@@ -56,7 +56,7 @@ namespace MapHelper
 
     public static class TileGraphBuilder
     {
-        public static TileGraph Build(List<TileNode> nodes, float jumpRadius = 5f)
+        public static TileGraph Build(List<TileNode> nodes, float jumpRadius = 4f)
         {
             var graph = new TileGraph { nodes = nodes };
 
@@ -88,24 +88,8 @@ namespace MapHelper
 
                         if (sqrDist <= jumpRadius * jumpRadius)
                         {
-                            // Tile to Tile 사이 타일 검사
-                            bool isBlocked = false;
-                            Vector2 dir = ((Vector2)(toPos - fromPos)).normalized;
-                            Vector2Int checkPos = fromPos + Vector2Int.RoundToInt(dir);
-                            while (checkPos != toPos)
-                            {
-                                if (nodeMap.TryGetValue(checkPos, out TileNode midNode))
-                                {
-                                    if (midNode.TileType == ETileType.DeadEnd || midNode.TileType == ETileType.HorizontalOnly)
-                                    {
-                                        isBlocked = true;
-                                        break;
-                                    }
-                                }
-                                checkPos += Vector2Int.RoundToInt(dir);
-                            }
-
-                            if (!isBlocked)
+                            // 사이 타일 검사
+                            if (!HasBlockedBetween(fromPos, toPos, nodeMap))
                                 AddBidirectionalEdge(fromPos, toPos, EdgeType.Jump, Mathf.Sqrt(sqrDist), graph.edges);
                         }
                     }
@@ -123,8 +107,18 @@ namespace MapHelper
                         if (to.TileType == ETileType.DeadEnd)
                             continue;
 
-                        float dist = Vector2.Distance((Vector2)fromPos, (Vector2)neighbor);
-                        AddBidirectionalEdge(fromPos, neighbor, EdgeType.Horizontal, dist, graph.edges);
+                        bool isBetweenBlocked = false;
+                        if (from.TileType == ETileType.Jumpable && to.TileType == ETileType.Jumpable)
+                        {
+                            if (HasBlockedBetween(fromPos, neighbor, nodeMap))
+                                isBetweenBlocked = true;
+                        }
+
+                        if (!isBetweenBlocked)
+                        {
+                            float dist = Vector2.Distance((Vector2)fromPos, (Vector2)neighbor);
+                            AddBidirectionalEdge(fromPos, neighbor, EdgeType.Horizontal, dist, graph.edges);
+                        }
                     }
                 }
             }
@@ -138,6 +132,27 @@ namespace MapHelper
         {
             edges.Add(new TileEdge { from = a, to = b, edgeType = type, cost = cost });
             edges.Add(new TileEdge { from = b, to = a, edgeType = type, cost = cost });
+        }
+
+        // fromPos → toPos 사이의 경로 중 HorizontalOnly 타일이 존재하는지 검사
+        private static bool HasBlockedBetween(Vector2Int fromPos, Vector2Int toPos, Dictionary<Vector2Int, TileNode> nodeMap)
+        {
+            Vector2Int delta = toPos - fromPos;
+            int dx = Math.Sign(delta.x);
+            int dy = Math.Sign(delta.y);
+            int steps = Mathf.Max(Mathf.Abs(delta.x), Mathf.Abs(delta.y));
+
+            for (int i = 1; i < steps; i++) // fromPos, toPos 제외
+            {
+                Vector2Int checkPos = fromPos + new Vector2Int(dx * i, dy * i);
+                if (nodeMap.TryGetValue(checkPos, out TileNode midNode))
+                {
+                    if (midNode.TileType == ETileType.HorizontalOnly)
+                        return true; // 막힘
+                }
+            }
+
+            return false; // 막힌 타일 없음
         }
     }
 }
@@ -167,9 +182,9 @@ public class MapManager
         Map = map;
         MapName = mapName;
         CellGrid = map.GetComponent<Grid>();
-
-        // To Do : Stage 늘어날 시 Stage or Map별로 분기
-        return ParseMapGraphData(/*map, mapName*/);
+        map.FindChild(name: "Ground", recursive: true).layer = (int)ELayer.Ground;
+        
+        return TileMapGraph;
     }
 
     public void DestroyMap()

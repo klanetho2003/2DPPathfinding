@@ -43,9 +43,9 @@ public class InputManager
     {
         _moveAction = new InputAction("Move", InputActionType.Value);
         _moveAction.AddCompositeBinding("1DAxis")
-            .With("Negative", "<Keyboard>/a")
+            // .With("Negative", "<Keyboard>/a")
             .With("Negative", "<Keyboard>/leftArrow")
-            .With("Positive", "<Keyboard>/d")
+            // .With("Positive", "<Keyboard>/d")
             .With("Positive", "<Keyboard>/rightArrow");
         _moveAction.Enable();
     }
@@ -66,7 +66,7 @@ public class InputManager
         {
             float now = Time.time;
 
-            // DoubleTap 검사
+            // DoubleTap Check
             if (_lastPressedTime.TryGetValue(evt, out float lastTime))
             {
                 if (now - lastTime <= _doubleTapThreshold)
@@ -100,7 +100,6 @@ public class InputManager
     {
         float now = Time.time;
 
-        // Dictionary를 안전하게 순회하기 위해 Key snapshot을 만든다
         var holdingKeys = new List<KeyDownEvent>(_isHolding.Keys);
 
         foreach (var evt in holdingKeys)
@@ -110,7 +109,8 @@ public class InputManager
 
             if (now - pressedTime >= _holdThreshold)
             {
-                _isHolding[evt] = false; // 안전하게 수정 가능
+                _isHolding[evt] = false;
+                Debug.Log($"{evt} , {KeyInputType.Hold}");
                 OnKeyInputHandler?.Invoke(evt, KeyInputType.Hold);
             }
         }
@@ -118,8 +118,35 @@ public class InputManager
     #endregion
 
     #region Move Handling
+    private bool _isMoveKeyPressed = false;
+    private static readonly Key[] _moveKeys = new Key[]
+    {
+        Key.LeftArrow, Key.RightArrow
+    };
+
     private void HandleMoveInput()
     {
+        #region Dirty Flag Check
+        bool isAnyPressed = false;
+        foreach (var key in _moveKeys)
+        {
+            if (Keyboard.current[key].isPressed)
+            {
+                isAnyPressed = true;
+                break;
+            }
+        }
+
+        // dirty flag 갱신
+        _isMoveKeyPressed = isAnyPressed;
+        #endregion
+
+        if (!_isMoveKeyPressed)
+        {
+            Managers.Game.MoveDir = Vector2.zero;
+            return;
+        }
+
         float dir = _moveAction.ReadValue<float>();
         switch (dir)
         {
@@ -130,7 +157,6 @@ public class InputManager
                 Managers.Game.MoveDir = Vector2.left;
                 break;
             default: // 0
-                Managers.Game.MoveDir = Vector2.zero;
                 break;
         }
     }

@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: 006b91e11152941e0a04e6f916453b63
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 237109
+  packageName: Pixel Art Platformer - Dungeon
+  packageVersion: 1.1.5
+  assetPath: Assets/Cainos/Third Party/Lucid Editor/Runtime/Attributes/ReadOnlyAttribute.cs
+  uploadId: 705949

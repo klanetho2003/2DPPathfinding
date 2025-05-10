@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: caf111390d23e46798c4df039cd07324
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 237109
+  packageName: Pixel Art Platformer - Dungeon
+  packageVersion: 1.1.5
+  assetPath: Assets/Cainos/Third Party/Lucid Editor/Editor/InspectorProperty/InspectorButton.cs
+  uploadId: 705949
