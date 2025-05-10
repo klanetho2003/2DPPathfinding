@@ -11,7 +11,7 @@
       "ColliderSizeY": 1.25,
       "MaxHp": 100.0,
       "MaxSpeed": 8.0,
-      "JumpForce": 10.0
+      "JumpForce": 8.0
     }
   ]
 }
