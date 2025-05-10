@@ -96,14 +96,14 @@ public class Creature : BaseController
         // Animatior
         SetAnimation(CreatureData.AnimDataId, CreatureData.SortingLayerName, SortingLayers.CREATURE);
 
-        // State
-        CreatureState = ECreatureState.Idle;
-
         // Stat
         Hp = CreatureData.MaxHp;
         MaxHp = CreatureData.MaxHp;
         MaxSpeed = CreatureData.MaxSpeed;
         JumpForce = CreatureData.JumpForce;
+
+        // State
+        CreatureState = ECreatureState.Idle;
     }
     #endregion
 
@@ -127,12 +127,16 @@ public class Creature : BaseController
             case ECreatureState.Jump:
                 UpdateJump();
                 break;
+            case ECreatureState.Fall:
+                UpdateFall();
+                break;
         }
     }
 
     protected virtual void UpdateIdle() { }
-    protected virtual void UpdateJump() { }
     protected virtual void UpdateMove() { }
+    protected virtual void UpdateJump() { }
+    protected virtual void UpdateFall() { }
 
     protected override void UpdateAnimation() { }
     #endregion
@@ -140,24 +144,29 @@ public class Creature : BaseController
     #region FixedUpdate & Move Method
     protected override void FixedUpdateController()
     {
-        // 속도 적용
-        SetRigidBodyVelocity(TargetVelocityX);
+        // if -> 수평 이동 vs 마찰
+        if (!Mathf.Approximately(MoveDir.x, 0f))
+        {
+            // 이동 방향이 설정_O -> 목표 속도로 설정
+            SetRigidBodyVelocity(TargetVelocityX);
+        }
+        else if (IsGrounded)
+        {
+            // 이동 방향 설정_X && 지면에 있을 때 -> 지상 마찰만 적용
+            ApplyGroundFriction();
+        }
+        // 공중에선 그대로 관성 유지
 
-        // 마찰력 부여
-        ApplyGroundFriction();
-
-
-        // 좌표 연산
-        /*Vector3 dest = MoveDir.normalized * MoveSpeed;
-        transform.position = transform.position + (dest * Time.fixedDeltaTime);*/
+        // 2. Better Jump: 강화 낙하 & 가변 점프 높이
+        ApplyBetterJump();
     }
 
     protected virtual void UpdateGrounded()
     {
-        IsGrounded = Physics2D.Raycast(transform.position, Vector2.down, 1.1f, LayerMask.GetMask("Ground"));
+        IsGrounded = Physics2D.Raycast(transform.position, Vector2.down, 0.1f, LayerMask.GetMask("Ground"));
     }
 
-    private float velocityXSmoothing; // 속도 보간 진행 저장용
+    private float velocityXSmoothing;
     private void CalculateTargetVelocity()
     {
         float accelTime = IsGrounded ? MovementValues.groundAccelTime : MovementValues.airAccelTime;
@@ -167,25 +176,46 @@ public class Creature : BaseController
 
     public virtual void SetRigidBodyVelocity(float velocity)
     {
-        if (CreatureState != ECreatureState.Move)
-            return;
-
         RigidBody.linearVelocity = new Vector2(velocity, RigidBody.linearVelocityY);
 
-        if (velocity < 0)
-            LookRight = false;
-        else if (velocity > 0)
-            LookRight = true;
+        // Animation 방향 전환
+        LookRight = TargetVelocityX > 0;
     }
 
     protected void ApplyGroundFriction()
     {
-        if (CreatureState == ECreatureState.Move)
-            return;
-        if (!IsGrounded || Mathf.Approximately(MoveDir.x, 0f) == false)
+        if (!IsGrounded || !Mathf.Approximately(MoveDir.x, 0f))
             return;
 
-        RigidBody.linearVelocity = new Vector2(RigidBody.linearVelocityX * MovementValues.groundFriction, RigidBody.linearVelocityY);
+        RigidBody.linearVelocity = new Vector2(
+            RigidBody.linearVelocityX * MovementValues.groundFriction,
+            RigidBody.linearVelocityY
+        );
+    }
+
+    protected virtual void DoJump(Vector2 dir, bool onWall)
+    {
+        if (!IsGrounded) return;
+
+        RigidBody.linearVelocity += dir * JumpForce;
+
+        CreatureState = ECreatureState.Jump;
+    }
+
+    protected virtual void ApplyBetterJump()
+    {
+        if (IsGrounded)
+            return;
+
+        float vy = RigidBody.linearVelocityY;
+        float multiplier = 1f;
+
+        // 빠른 낙하
+        if (vy < 0f)
+            multiplier = MovementValues.fallMultiplier;
+
+        // 적용
+        RigidBody.linearVelocity = Vector2.up * Physics2D.gravity.y * (multiplier - 1f) * Time.fixedDeltaTime;
     }
     #endregion
 }

@@ -12,6 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: eb5d7076f052fec4380a105fda9ad257, type: 3}
   m_Name: MoveMentValues_Player
   m_EditorClassIdentifier: 
-  groundAccelTime: 0.05
-  airAccelTime: 0.055
-  groundFriction: 0.92
+  groundAccelTime: 0.09
+  airAccelTime: 0.09
+  groundFriction: 0.95
+  fallMultiplier: 1.5
+  lowJumpMultiplier: 6

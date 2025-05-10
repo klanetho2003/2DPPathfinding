@@ -58,6 +58,7 @@ public class Define
         Idle,
         Move,
         Jump,
+        Fall,
     }
 
     public enum ETileType
