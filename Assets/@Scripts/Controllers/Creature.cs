@@ -20,8 +20,9 @@ public class Creature : BaseController
 
             _moveDir = value.normalized;
 
-            // Animation 방향 전환
-            LookRight = value.x > 0;
+            // Sprite 방향 전환
+            if (value.x > 0)        LookRight = true;
+            else if (value.x < 0)   LookRight = false;
         }
     }
 
@@ -148,9 +149,6 @@ public class Creature : BaseController
         // OnWall Check
         UpdateOnWall();
 
-        // 목표 속도 계산
-        CalculateTargetVelocity();
-
         switch (CreatureState)
         {
             case ECreatureState.Idle:
@@ -183,6 +181,9 @@ public class Creature : BaseController
     
     protected override void FixedUpdateController()
     {
+        // 목표 속도 계산
+        CalculateTargetVelocity();
+
         // if -> 수평 이동 vs 마찰
         if (!Mathf.Approximately(MoveDir.x, 0f))
         {
@@ -232,9 +233,11 @@ public class Creature : BaseController
     #endregion
 
     #region Jump Method
-    protected virtual void DoJump(Vector2 dir)
+    protected virtual void DoJump(Vector2 dir, float force)
     {
-        RigidBody.linearVelocity += dir * JumpForce;
+        if (dir == Vector2.zero || force == 0) return;
+
+        RigidBody.linearVelocity += dir * force;
 
         CreatureState = ECreatureState.Jump;
     }

@@ -1,3 +1,4 @@
+using Unity.VisualScripting;
 using UnityEngine;
 using static Define;
 
@@ -44,16 +45,32 @@ public class Player : Creature
             case EKeyInputType.Down:
                 {
                     #region Space
-                    if (key == EKeyDownEvent.Space && IsGrounded)
+                    if (key == EKeyDownEvent.Space)
                     {
+                        Vector2 jumpDir;
+
+                        if (OnWall && IsGrounded)
+                        {
+                            if (OnLeftWall == true)
+                                jumpDir = new Vector2(1f, 2f);
+                            else if (OnRightWall && IsGrounded)
+                                jumpDir = new Vector2(-1f, 2f);
+
+                            return;
+                        }
+
+                        if (OnLeftWall && IsLeftKeyInput() == false)
+                            jumpDir = new Vector2(1f, 2f);
+                        else if (OnRightWall && IsRightKeyInput() == false)
+                            jumpDir = new Vector2(-1f, 2f);
+                        else
+                        {
+                            if (OnWall) break;
+                            jumpDir = (IsGrounded) ? Vector2.up : Vector2.zero;
+                        }
+
+                        DoJump(jumpDir.normalized, JumpForce);
                         _isJumpKeyDown = true;
-                        DoJump(Vector2.up);
-                    }
-                    else if (true)
-                    {
-                        _isJumpKeyDown = true;
-                        Vector2 jumpDir = OnLeftWall ? Vector2.right : Vector2.left;
-                        DoJump((Vector2.up / 1.5f) + (jumpDir / 1.5f));
                     }
                     #endregion
                 }
@@ -121,16 +138,21 @@ public class Player : Creature
 
     protected override void UpdateJump()
     {
-        UpdateAnimation(); // Jump Mid 구간으로 Animation을 바꾸기 위해 호출
-
         if (RigidBody.linearVelocityY < -1.5f)
             CreatureState = ECreatureState.Fall;
 
+        else if (OnLeftWall  && IsRightKeyInput())
+            CreatureState = ECreatureState.Jump;
+        else if (OnRightWall && IsLeftKeyInput())
+            CreatureState = ECreatureState.Jump;
         else if (OnWall)
             CreatureState = ECreatureState.Wall;
 
         else if (IsGrounded && Util.IsEqualValue(RigidBody.linearVelocityY, 0))
             CreatureState = ECreatureState.Idle;
+
+        if (CreatureState == ECreatureState.Jump)
+            UpdateAnimation(); // Jump Mid 구간으로 Animation을 바꾸기 위해 호출
     }
 
     protected override void UpdateFall()
@@ -194,9 +216,12 @@ public class Player : Creature
     #endregion
 
     #region Jump Method
-    protected override void DoJump(Vector2 dir)
+    protected override void DoJump(Vector2 dir, float force)
     {
-        base.DoJump(dir);
+        if (OnWall)
+            force = force * 1.5f;
+
+        base.DoJump(dir, force);
     }
 
     protected override void ApplyBetterJump()
@@ -220,6 +245,17 @@ public class Player : Creature
 
         // 적용
         RigidBody.linearVelocity += Vector2.up * Physics2D.gravity.y * (multiplier - 1f) * Time.fixedDeltaTime;
+    }
+    #endregion
+
+    #region Helper
+    bool IsLeftKeyInput()
+    {
+        return MoveDir.x < 0;
+    }
+    bool IsRightKeyInput()
+    {
+        return MoveDir.x > 0;
     }
     #endregion
 }
