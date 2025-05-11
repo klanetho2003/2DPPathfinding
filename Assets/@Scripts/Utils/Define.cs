@@ -59,6 +59,7 @@ public class Define
         Move,
         Jump,
         Fall,
+        Wall,
     }
 
     public enum ETileType

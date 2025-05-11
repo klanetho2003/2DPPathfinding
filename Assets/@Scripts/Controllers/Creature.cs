@@ -16,9 +16,11 @@ public class Creature : BaseController
         get { return _moveDir; }
         set
         {
+            if (_moveDir == value) return;
+
             _moveDir = value.normalized;
 
-            UpdateAnimation(); // To Do
+            UpdateAnimation();
         }
     }
 
@@ -28,6 +30,24 @@ public class Creature : BaseController
     {
         get { return _isGrounded; }
         protected set { _isGrounded = value; }
+    }
+
+    public bool OnWall { get { return OnRightWall | OnLeftWall; } }
+
+    [SerializeField] // For Debug
+    protected bool _onLeftWall = false;
+    public bool OnLeftWall
+    {
+        get { return _onLeftWall; }
+        protected set { _onLeftWall = value; }
+    }
+
+    [SerializeField] // For Debug
+    protected bool _onRightWall = false;
+    public bool OnRightWall
+    {
+        get { return _onRightWall; }
+        protected set { _onRightWall = value; }
     }
 
     [SerializeField] // For Debug
@@ -41,6 +61,8 @@ public class Creature : BaseController
                 return;
 
             _creatureState = value;
+
+            UpdateAnimation();
         }
     }
 
@@ -56,6 +78,12 @@ public class Creature : BaseController
     public float JumpForce { get; set; }
     #endregion
 
+    #region Caching
+
+    private LayerMask _groundLayer;
+
+    #endregion
+
     #region Init & SetInfo
     public override bool Init()
     {
@@ -64,6 +92,9 @@ public class Creature : BaseController
 
         Collider = GetComponent<CapsuleCollider2D>();
         RigidBody = GetComponent<Rigidbody2D>();
+
+        _groundLayer = LayerMask.GetMask("Ground");
+        // _wallLayer = LayerMask.GetMask("Wall");
 
         return true;
     }
@@ -113,6 +144,9 @@ public class Creature : BaseController
         // Grounded Check
         UpdateGrounded();
 
+        // OnWall Check
+        UpdateOnWall();
+
         // 목표 속도 계산
         CalculateTargetVelocity();
 
@@ -130,6 +164,9 @@ public class Creature : BaseController
             case ECreatureState.Fall:
                 UpdateFall();
                 break;
+            case ECreatureState.Wall:
+                UpdateWall();
+                break;
         }
     }
 
@@ -137,11 +174,12 @@ public class Creature : BaseController
     protected virtual void UpdateMove() { }
     protected virtual void UpdateJump() { }
     protected virtual void UpdateFall() { }
+    protected virtual void UpdateWall() { }
 
     protected override void UpdateAnimation() { }
     #endregion
 
-    #region FixedUpdate & Move Method
+    
     protected override void FixedUpdateController()
     {
         // if -> 수평 이동 vs 마찰
@@ -161,9 +199,10 @@ public class Creature : BaseController
         ApplyBetterJump();
     }
 
+    #region Move Method
     protected virtual void UpdateGrounded()
     {
-        IsGrounded = Physics2D.Raycast(transform.position, Vector2.down, 0.1f, LayerMask.GetMask("Ground"));
+        IsGrounded = Physics2D.Raycast(transform.position, Vector2.down, 0.1f, _groundLayer);
     }
 
     private float velocityXSmoothing;
@@ -192,7 +231,9 @@ public class Creature : BaseController
             RigidBody.linearVelocityY
         );
     }
+    #endregion
 
+    #region Jump Method
     protected virtual void DoJump(Vector2 dir, bool onWall)
     {
         if (!IsGrounded) return;
@@ -218,4 +259,32 @@ public class Creature : BaseController
         RigidBody.linearVelocity = Vector2.up * Physics2D.gravity.y * (multiplier - 1f) * Time.fixedDeltaTime;
     }
     #endregion
+
+    #region Wall Method
+
+    Vector2 _onWallCheck_LineLeft_StartPos;
+    Vector2 _onWallCheck_LineRight_StartPos;
+    protected virtual void UpdateOnWall()
+    {
+        _onWallCheck_LineLeft_StartPos = (Vector2)transform.position + MovementValues.leftLineOffset;
+        OnLeftWall = Physics2D.Raycast(_onWallCheck_LineLeft_StartPos, Vector2.left, 0.1f, _groundLayer);
+
+        _onWallCheck_LineRight_StartPos = (Vector2)transform.position + MovementValues.rightLineOffset;
+        OnRightWall = Physics2D.Raycast(_onWallCheck_LineRight_StartPos, Vector2.right, 0.1f, _groundLayer);
+    }
+
+    #endregion
+
+    // Gizmo to Debug
+    void OnDrawGizmos()
+    {
+        Gizmos.color = Color.red;
+
+        // IsGrounded
+        Gizmos.DrawLine(transform.position, (Vector2)transform.position + Vector2.down * 0.1f);
+
+        // OnWall
+        Gizmos.DrawLine(_onWallCheck_LineLeft_StartPos, _onWallCheck_LineLeft_StartPos + Vector2.left * 0.1f);
+        Gizmos.DrawLine(_onWallCheck_LineRight_StartPos, _onWallCheck_LineRight_StartPos + Vector2.right * 0.1f);
+    }
 }

@@ -202,4 +202,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 502ae27f08a92fd4795c81b38b1a4294, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _isGrounded: 0
+  _onLeftWall: 0
+  _onRightWall: 0
   _creatureState: 0
+  _isJumpKeyDown: 0

@@ -70,6 +70,11 @@ public static class Util
         return parseColor;
     }
 
+    public static bool IsEqualValue(float valueA, float valueB, float EPS = 0.001f)
+    {
+        return valueA - valueB < EPS; ;
+    }
+
     // 갓챠
     public static T RandomElementByWeight<T>(this IEnumerable<T> sequence, Func<T, float> weightSelector)
     {

@@ -95,6 +95,9 @@ public class Player : Creature
             case ECreatureState.Fall:
                 Anim.Play("JumpFall");
                 break;
+            case ECreatureState.Wall:
+                Anim.Play("WallClimbIdle");
+                break;
         }
     }
 
@@ -115,7 +118,7 @@ public class Player : Creature
 
         if (RigidBody.linearVelocityY < -1.5f)
             CreatureState = ECreatureState.Fall;
-        else if (IsGrounded && RigidBody.linearVelocityY == 0)
+        else if (IsGrounded && Util.IsEqualValue(RigidBody.linearVelocityY, 0))
             CreatureState = ECreatureState.Idle;
     }
 
@@ -123,6 +126,11 @@ public class Player : Creature
     {
         if (IsGrounded)
             CreatureState = ECreatureState.Idle;
+    }
+
+    protected override void UpdateWall()
+    {
+        
     }
     #endregion
 
