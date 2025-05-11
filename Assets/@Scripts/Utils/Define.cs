@@ -12,13 +12,17 @@ public class Define
         GameScene,
     }
 
-    public enum KeyDownEvent
+    public enum EKeyDownEvent
     {
+        None = -1,
+
         Space = 100,
     }
 
-    public enum KeyInputType
+    public enum EKeyInputType
     {
+        None = -1,
+
         Down,
         Up,
         Hold,

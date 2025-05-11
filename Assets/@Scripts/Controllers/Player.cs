@@ -36,34 +36,41 @@ public class Player : Creature
         MoveDir = dir;
     }
 
-    void HandleOnKeyInputHandler(KeyDownEvent key, KeyInputType inputType)
+    void HandleOnKeyInputHandler(EKeyDownEvent key, EKeyInputType inputType)
     {
+        // Input Habdle
         switch (inputType)
         {
-            case KeyInputType.Down:
+            case EKeyInputType.Down:
                 {
                     #region Space
-                    if (key == KeyDownEvent.Space)
+                    if (key == EKeyDownEvent.Space && IsGrounded)
                     {
                         _isJumpKeyDown = true;
-                        DoJump(Vector2.up, false);
+                        DoJump(Vector2.up);
+                    }
+                    else if (true)
+                    {
+                        _isJumpKeyDown = true;
+                        Vector2 jumpDir = OnLeftWall ? Vector2.right : Vector2.left;
+                        DoJump((Vector2.up / 1.5f) + (jumpDir / 1.5f));
                     }
                     #endregion
                 }
                 break;
-            case KeyInputType.Up:
+            case EKeyInputType.Up:
                 {
                     #region Space
-                    if (key == KeyDownEvent.Space)
+                    if (key == EKeyDownEvent.Space)
                     {
                         _isJumpKeyDown = false;
                     }
                     #endregion
                 }
                 break;
-            case KeyInputType.Hold:
+            case EKeyInputType.Hold:
                 break;
-            case KeyInputType.DoubleTap:
+            case EKeyInputType.DoubleTap:
                 break;
         }
     }
@@ -118,25 +125,78 @@ public class Player : Creature
 
         if (RigidBody.linearVelocityY < -1.5f)
             CreatureState = ECreatureState.Fall;
+
+        else if (OnWall)
+            CreatureState = ECreatureState.Wall;
+
         else if (IsGrounded && Util.IsEqualValue(RigidBody.linearVelocityY, 0))
             CreatureState = ECreatureState.Idle;
     }
 
     protected override void UpdateFall()
     {
-        if (IsGrounded)
+        if (OnWall)
+            CreatureState = ECreatureState.Wall;
+
+        else if (IsGrounded)
             CreatureState = ECreatureState.Idle;
     }
 
     protected override void UpdateWall()
     {
-        
+        // 지면_X
+        if (IsGrounded == false)
+        {
+            switch (MoveDir.x)
+            {
+                case 1: // Move Input '->'
+                    {
+                        if (OnLeftWall == true)
+                            CreatureState = ECreatureState.Fall;
+                    }
+                    break;
+                case -1: // Move Input '<-'
+                    {
+                        if (OnRightWall == true)
+                            CreatureState = ECreatureState.Fall;
+                    }
+                    break;
+            }
+        }
+
+        // 지면_O
+        else
+        {
+            switch (MoveDir.x)
+            {
+                case 0: // Move Input 'None'
+                    CreatureState = ECreatureState.Idle;
+                    break;
+                case 1: // Move Input '->'
+                    {
+                        if (OnLeftWall == true)
+                            CreatureState = ECreatureState.Idle;
+                    }
+                    break;
+                case -1: // Move Input '<-'
+                    {
+                        if (OnRightWall == true)
+                            CreatureState = ECreatureState.Idle;
+                    }
+                    break;
+            }
+        }
+
+        // 최최최종 Plan
+        if (OnWall == false && CreatureState == ECreatureState.Wall)
+            CreatureState = ECreatureState.Fall;
     }
     #endregion
 
-    protected override void DoJump(Vector2 dir, bool onWall)
+    #region Jump Method
+    protected override void DoJump(Vector2 dir)
     {
-        base.DoJump(dir, onWall);
+        base.DoJump(dir);
     }
 
     protected override void ApplyBetterJump()
@@ -161,4 +221,5 @@ public class Player : Creature
         // 적용
         RigidBody.linearVelocity += Vector2.up * Physics2D.gravity.y * (multiplier - 1f) * Time.fixedDeltaTime;
     }
+    #endregion
 }

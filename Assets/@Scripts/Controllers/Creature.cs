@@ -20,7 +20,8 @@ public class Creature : BaseController
 
             _moveDir = value.normalized;
 
-            UpdateAnimation();
+            // Animation 방향 전환
+            LookRight = value.x > 0;
         }
     }
 
@@ -216,9 +217,6 @@ public class Creature : BaseController
     public virtual void SetRigidBodyVelocity(float velocity)
     {
         RigidBody.linearVelocity = new Vector2(velocity, RigidBody.linearVelocityY);
-
-        // Animation 방향 전환
-        LookRight = TargetVelocityX > 0;
     }
 
     protected void ApplyGroundFriction()
@@ -234,10 +232,8 @@ public class Creature : BaseController
     #endregion
 
     #region Jump Method
-    protected virtual void DoJump(Vector2 dir, bool onWall)
+    protected virtual void DoJump(Vector2 dir)
     {
-        if (!IsGrounded) return;
-
         RigidBody.linearVelocity += dir * JumpForce;
 
         CreatureState = ECreatureState.Jump;

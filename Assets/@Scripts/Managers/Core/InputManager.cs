@@ -8,12 +8,12 @@ public class InputManager
 {
     // KeyBoard
     private InputAction _moveAction;
-    private Dictionary<KeyDownEvent, InputAction> _keyBindings = new();
-    private Dictionary<KeyDownEvent, float> _lastPressedTime = new();
-    private Dictionary<KeyDownEvent, bool> _isHolding = new();
+    private Dictionary<EKeyDownEvent, InputAction> _keyBindings = new();
+    private Dictionary<EKeyDownEvent, float> _lastPressedTime = new();
+    private Dictionary<EKeyDownEvent, bool> _isHolding = new();
 
     // 콜백
-    public event Action<KeyDownEvent, KeyInputType> OnKeyInputHandler;
+    public event Action<EKeyDownEvent, EKeyInputType> OnKeyInputHandler;
 
     // 설정값 -> Game에 따라 수정 필요
     private const float _holdThreshold = 0.5f;
@@ -52,12 +52,12 @@ public class InputManager
 
     private void InitKeyBindings()
     {
-        AddKey(KeyDownEvent.Space, Key.Space);
+        AddKey(EKeyDownEvent.Space, Key.Space);
         // AddKey(KeyDownEvent.Num1, Key.Digit1);
         // AddKey(KeyDownEvent.R, Key.Digit2);
     }
 
-    private void AddKey(KeyDownEvent evt, Key key)
+    private void AddKey(EKeyDownEvent evt, Key key)
     {
         string path = $"<Keyboard>/{key.ToString().ToLower()}";
         var action = new InputAction(evt.ToString(), InputActionType.Button, path);
@@ -71,23 +71,23 @@ public class InputManager
             {
                 if (now - lastTime <= _doubleTapThreshold)
                 {
-                    Debug.Log($"{evt} , {KeyInputType.DoubleTap}");
-                    OnKeyInputHandler?.Invoke(evt, KeyInputType.DoubleTap);
+                    Debug.Log($"{evt} , {EKeyInputType.DoubleTap}");
+                    OnKeyInputHandler?.Invoke(evt, EKeyInputType.DoubleTap);
                 }   
             }
 
             _lastPressedTime[evt] = now;
             _isHolding[evt] = true; // Hold Trigger
 
-            Debug.Log($"{evt} , {KeyInputType.Down}");
-            OnKeyInputHandler?.Invoke(evt, KeyInputType.Down);
+            Debug.Log($"{evt} , {EKeyInputType.Down}");
+            OnKeyInputHandler?.Invoke(evt, EKeyInputType.Down);
         };
 
         action.canceled += ctx =>
         {
             _isHolding[evt] = false;
-            Debug.Log($"{evt} , {KeyInputType.Up}");
-            OnKeyInputHandler?.Invoke(evt, KeyInputType.Up);
+            Debug.Log($"{evt} , {EKeyInputType.Up}");
+            OnKeyInputHandler?.Invoke(evt, EKeyInputType.Up);
         };
 
         action.Enable();
@@ -100,7 +100,7 @@ public class InputManager
     {
         float now = Time.time;
 
-        var holdingKeys = new List<KeyDownEvent>(_isHolding.Keys);
+        var holdingKeys = new List<EKeyDownEvent>(_isHolding.Keys);
 
         foreach (var evt in holdingKeys)
         {
@@ -110,8 +110,8 @@ public class InputManager
             if (now - pressedTime >= _holdThreshold)
             {
                 _isHolding[evt] = false;
-                Debug.Log($"{evt} , {KeyInputType.Hold}");
-                OnKeyInputHandler?.Invoke(evt, KeyInputType.Hold);
+                Debug.Log($"{evt} , {EKeyInputType.Hold}");
+                OnKeyInputHandler?.Invoke(evt, EKeyInputType.Hold);
             }
         }
     }
