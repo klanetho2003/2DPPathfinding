@@ -170,12 +170,10 @@ public class Player : Creature
         // 하강
         if (RigidBody.linearVelocityY < PlayerData.MidToFallSpeedThreshold)
             CreatureState = ECreatureState.Fall;
-        
-        else if (OnLeftWall  && IsRightKeyInput())  // Wall Grap을 더 후하게
-            CreatureState = ECreatureState.Jump;
-        else if (OnRightWall && IsLeftKeyInput())   // Wall Grap을 더 후하게
-            CreatureState = ECreatureState.Jump;
-        else if (OnWall && MoveDir != Vector2.zero) // Wall Grap
+
+        else if (OnLeftWall && IsRightKeyInput()) return;   // Wall Jump를 더 후하게
+        else if (OnRightWall && IsLeftKeyInput()) return;   // Wall Jump를 더 후하게
+        else if (OnWall && MoveDir != Vector2.zero)         // Wall Grap
             CreatureState = ECreatureState.Wall;
 
         // 착지
@@ -189,7 +187,9 @@ public class Player : Creature
 
     protected override void UpdateFall()
     {
-        if (OnWall)
+        if (OnLeftWall && IsRightKeyInput())        return; // Fall을 더 후하게
+        else if (OnRightWall && IsLeftKeyInput())   return; // Fall을 더 후하게
+        else if (OnWall && MoveDir != Vector2.zero)
             CreatureState = ECreatureState.Wall;
 
         else if (IsGrounded)
@@ -198,6 +198,8 @@ public class Player : Creature
 
     protected override void UpdateWall()
     {
+        ApplyWallSlide();
+
         // 지면_X
         if (IsGrounded == false)
         {
@@ -205,11 +207,11 @@ public class Player : Creature
             {
                 // Move Input '->'
                 case 1:     if (OnLeftWall == true)     CreatureState = ECreatureState.Fall;
-                    break;
+                    return;
 
                 // Move Input '<-'
                 case -1:    if (OnRightWall == true)    CreatureState = ECreatureState.Fall;
-                    break;
+                    return;
             }
         }
 
@@ -220,21 +222,35 @@ public class Player : Creature
             {
                 // Move Input 'None'
                 case 0:     CreatureState = ECreatureState.Idle;
-                    break;
+                    return;
 
                 // Move Input '->'
                 case 1:     if (OnLeftWall == true)     CreatureState = ECreatureState.Idle;
-                    break;
+                    return;
 
                 // Move Input '<-'
                 case -1:    if (OnRightWall == true)    CreatureState = ECreatureState.Idle;
-                    break;
+                    return;
             }
         }
 
         // 최최최종 Plan
         if (OnWall == false && CreatureState == ECreatureState.Wall)
             CreatureState = ECreatureState.Fall;
+    }
+
+    private void ApplyWallSlide()
+    {
+        // 아래로 떨어지는 중일 때만
+        if (RigidBody.linearVelocityY < 0f)
+        {
+            // 더 빠르게 내려가지 않도록 Clamp
+            float maxDown = -MovementValues.wallSlideMaxSpeed;
+            if (RigidBody.linearVelocityY < maxDown)
+            {
+                RigidBody.linearVelocityY = maxDown;
+            }
+        }
     }
     #endregion
 

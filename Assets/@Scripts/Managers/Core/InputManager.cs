@@ -157,6 +157,7 @@ public class InputManager
                 Managers.Game.MoveDir = Vector2.left;
                 break;
             default: // 0
+                Managers.Game.MoveDir = Vector2.zero;
                 break;
         }
     }

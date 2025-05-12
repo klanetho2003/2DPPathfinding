@@ -19,3 +19,4 @@ MonoBehaviour:
   lowJumpMultiplier: 6
   leftLineOffset: {x: -0.32, y: 0.65}
   rightLineOffset: {x: 0.25, y: 0.65}
+  wallSlideMaxSpeed: 2

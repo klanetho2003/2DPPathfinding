@@ -20,4 +20,7 @@ public class MoveMentValues : ScriptableObject
 
     [Header("오른쪽 벽 '' ")]
     public Vector2 rightLineOffset = new Vector2(0.5f, 0.5f);
+
+    [Header("벽에 닿아 있을 때 하강 속도")]
+    public float wallSlideMaxSpeed = 2;
 }
