@@ -1,9 +1,12 @@
+using Data;
 using Unity.VisualScripting;
 using UnityEngine;
 using static Define;
 
 public class Player : Creature
 {
+    public PlayerData PlayerData { get { return (PlayerData)CreatureData; } }
+
     [SerializeField]
     bool _isJumpKeyDown = false;
 
@@ -48,28 +51,32 @@ public class Player : Creature
                     if (key == EKeyDownEvent.Space)
                     {
                         Vector2 jumpDir;
-
-                        if (OnWall && IsGrounded)
+                        float force = JumpForce;
+                        
+                        if (OnLeftWall && IsGrounded == false && IsLeftKeyInput() == false)
                         {
-                            if (OnLeftWall == true)
-                                jumpDir = new Vector2(1f, 2f);
-                            else if (OnRightWall && IsGrounded)
-                                jumpDir = new Vector2(-1f, 2f);
-
-                            return;
-                        }
-
-                        if (OnLeftWall && IsLeftKeyInput() == false)
                             jumpDir = new Vector2(1f, 2f);
-                        else if (OnRightWall && IsRightKeyInput() == false)
+                            force = force  * 1.5f;
+                        }   
+                        else if (OnRightWall && IsGrounded == false && IsRightKeyInput() == false)
+                        {
                             jumpDir = new Vector2(-1f, 2f);
+                            force = force * 1.5f;
+                        }   
                         else
                         {
-                            if (OnWall) break;
-                            jumpDir = (IsGrounded) ? Vector2.up : Vector2.zero;
+                            switch (CreatureState)
+                            {
+                                case ECreatureState.Jump:
+                                case ECreatureState.Fall:
+                                case ECreatureState.Wall:
+                                    return;
+                            }
+                            
+                            jumpDir = Vector2.up;
                         }
 
-                        DoJump(jumpDir.normalized, JumpForce);
+                        DoJump(jumpDir.normalized, force);
                         _isJumpKeyDown = true;
                     }
                     #endregion
@@ -98,6 +105,7 @@ public class Player : Creature
         base.FixedUpdateController();
     }
 
+    #region Animation
     protected override void UpdateAnimation()
     {
         switch (CreatureState)
@@ -110,7 +118,7 @@ public class Player : Creature
                 break;
             case ECreatureState.Jump:
                 {
-                    if (RigidBody.linearVelocityY > 1.5f)
+                    if (RigidBody.linearVelocityY > PlayerData.JumpToMidSpeedThreshold)
                         Anim.Play("JumpRise");
                     else
                         Anim.Play("JumpMid");
@@ -124,8 +132,29 @@ public class Player : Creature
                 break;
         }
     }
+    #endregion
 
     #region State Pattern
+    protected override void OnStateChange(ECreatureState brefore, ECreatureState after)
+    {
+        switch (after)
+        {
+            case ECreatureState.None:
+                break;
+            case ECreatureState.Move:
+                break;
+            case ECreatureState.Jump:
+                break;
+            case ECreatureState.Fall:
+                break;
+
+            case ECreatureState.Idle:
+            case ECreatureState.Wall:
+                RigidBody.linearVelocityY = 0;
+                break;
+        }
+    }
+
     protected override void UpdateIdle()
     {
         if (_moveDir != Vector2.zero) { CreatureState = ECreatureState.Move; return; }
@@ -138,21 +167,24 @@ public class Player : Creature
 
     protected override void UpdateJump()
     {
-        if (RigidBody.linearVelocityY < -1.5f)
+        // 하강
+        if (RigidBody.linearVelocityY < PlayerData.MidToFallSpeedThreshold)
             CreatureState = ECreatureState.Fall;
-
-        else if (OnLeftWall  && IsRightKeyInput())
+        
+        else if (OnLeftWall  && IsRightKeyInput())  // Wall Grap을 더 후하게
             CreatureState = ECreatureState.Jump;
-        else if (OnRightWall && IsLeftKeyInput())
+        else if (OnRightWall && IsLeftKeyInput())   // Wall Grap을 더 후하게
             CreatureState = ECreatureState.Jump;
-        else if (OnWall)
+        else if (OnWall && MoveDir != Vector2.zero) // Wall Grap
             CreatureState = ECreatureState.Wall;
 
+        // 착지
         else if (IsGrounded && Util.IsEqualValue(RigidBody.linearVelocityY, 0))
             CreatureState = ECreatureState.Idle;
 
+        // Jump Mid 구간으로 Animation을 바꾸기 위함
         if (CreatureState == ECreatureState.Jump)
-            UpdateAnimation(); // Jump Mid 구간으로 Animation을 바꾸기 위해 호출
+            UpdateAnimation();
     }
 
     protected override void UpdateFall()
@@ -171,17 +203,12 @@ public class Player : Creature
         {
             switch (MoveDir.x)
             {
-                case 1: // Move Input '->'
-                    {
-                        if (OnLeftWall == true)
-                            CreatureState = ECreatureState.Fall;
-                    }
+                // Move Input '->'
+                case 1:     if (OnLeftWall == true)     CreatureState = ECreatureState.Fall;
                     break;
-                case -1: // Move Input '<-'
-                    {
-                        if (OnRightWall == true)
-                            CreatureState = ECreatureState.Fall;
-                    }
+
+                // Move Input '<-'
+                case -1:    if (OnRightWall == true)    CreatureState = ECreatureState.Fall;
                     break;
             }
         }
@@ -191,20 +218,16 @@ public class Player : Creature
         {
             switch (MoveDir.x)
             {
-                case 0: // Move Input 'None'
-                    CreatureState = ECreatureState.Idle;
+                // Move Input 'None'
+                case 0:     CreatureState = ECreatureState.Idle;
                     break;
-                case 1: // Move Input '->'
-                    {
-                        if (OnLeftWall == true)
-                            CreatureState = ECreatureState.Idle;
-                    }
+
+                // Move Input '->'
+                case 1:     if (OnLeftWall == true)     CreatureState = ECreatureState.Idle;
                     break;
-                case -1: // Move Input '<-'
-                    {
-                        if (OnRightWall == true)
-                            CreatureState = ECreatureState.Idle;
-                    }
+
+                // Move Input '<-'
+                case -1:    if (OnRightWall == true)    CreatureState = ECreatureState.Idle;
                     break;
             }
         }
@@ -218,9 +241,6 @@ public class Player : Creature
     #region Jump Method
     protected override void DoJump(Vector2 dir, float force)
     {
-        if (OnWall)
-            force = force * 1.5f;
-
         base.DoJump(dir, force);
     }
 

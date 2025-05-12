@@ -2,6 +2,6 @@ To Do
 
 오늘은 벽타기 + 대쉬
 
-※주의, Frame 제한을 안 걸어둬서 기기마다 Scriptable Object로 조절할 필요 있음
-+ Movement에 영향을 미치는 값들 같이 실시간을 ㅗ조정해야하는 값들은 Scriptable Obejct에서,
-+ Hp, MaxSpeed 벨런스 Data 같은 경우에는 Data Sheet에서 조정
+※주의, Frame 제한을 안 걸어둬서 기기별로 Movement 벨런스 값은 Scriptable Object로 조절할 필요 있음
++ Movement에 영향을 미치는 값들 같이 실시간을 조정해야하는 값들은 Scriptable Obejct에서,
++ Hp, MaxSpeed 벨런스 Data 같이 거의 고정 값인 경우에는 Data Sheet에서 조정

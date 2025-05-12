@@ -1,6 +1,8 @@
 ﻿{
   "PlayersDatas": [
     {
+      "JumpToMidSpeedThreshold": 1.5,
+      "MidToFallSpeedThreshold": -1.5,
       "TemplateId": 10,
       "NameDataId": "PlayerTemp",
       "AnimDataId": "PlayerAnimator",

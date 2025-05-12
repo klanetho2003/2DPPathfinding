@@ -62,6 +62,8 @@ public class Creature : BaseController
             if (_creatureState == value)
                 return;
 
+            OnStateChange(_creatureState, value);
+
             _creatureState = value;
 
             UpdateAnimation();
@@ -140,7 +142,7 @@ public class Creature : BaseController
     }
     #endregion
 
-    #region Update
+    #region Update & State Method
     protected override void UpdateController()
     {
         // Grounded Check
@@ -176,9 +178,10 @@ public class Creature : BaseController
     protected virtual void UpdateWall() { }
 
     protected override void UpdateAnimation() { }
+
+    protected virtual void OnStateChange(ECreatureState brefore, ECreatureState after) { }
     #endregion
 
-    
     protected override void FixedUpdateController()
     {
         // 목표 속도 계산

@@ -65,7 +65,8 @@ namespace Data
     [Serializable]
     public class PlayerData : CreatureData
     {
-
+        public float JumpToMidSpeedThreshold; // Threshold : 경계값
+        public float MidToFallSpeedThreshold; // Threshold : 경계값
     }
 
     [Serializable]
