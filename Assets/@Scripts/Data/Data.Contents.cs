@@ -67,6 +67,8 @@ namespace Data
     {
         public float JumpToMidSpeedThreshold; // Threshold : 경계값
         public float MidToFallSpeedThreshold; // Threshold : 경계값
+
+        public float CoyoteTimeDuration;  // 지면 Check 유예 시간 (초)
     }
 
     [Serializable]

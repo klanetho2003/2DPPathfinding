@@ -8,7 +8,9 @@ public class Player : Creature
     public PlayerData PlayerData { get { return (PlayerData)CreatureData; } }
 
     [SerializeField]
-    bool _isJumpKeyDown = false;
+    private bool _isJumpKeyDown = false;
+
+    private float _lastGroundedTime; // 마지막으로 지면에 닿은 시점
 
     #region Init & SetInfo
     public override bool Init()
@@ -50,7 +52,7 @@ public class Player : Creature
                     #region Space
                     if (key == EKeyDownEvent.Space)
                     {
-                        Vector2 jumpDir;
+                        Vector2 jumpDir = Vector2.zero;
                         float force = JumpForce;
                         
                         if (OnLeftWall && IsGrounded == false && IsLeftKeyInput() == false)
@@ -63,7 +65,7 @@ public class Player : Creature
                             jumpDir = new Vector2(-1f, 2f);
                             force = force * 1.5f;
                         }   
-                        else
+                        else if (IsGroundedWithCoyote())
                         {
                             switch (CreatureState)
                             {
@@ -133,6 +135,22 @@ public class Player : Creature
         }
     }
     #endregion
+
+    protected override void UpdateController()
+    {
+        base.UpdateController();
+
+        UpdateCoyoteTimer(); // lastGroundedTime 갱신
+    }
+
+    private void UpdateCoyoteTimer()
+    {
+        // 지면에 닿을 때마다 시간을 리셋
+        if (IsGrounded == false)
+            return;
+        
+        _lastGroundedTime = Time.time;
+    }
 
     #region State Pattern
     protected override void OnStateChange(ECreatureState brefore, ECreatureState after)
@@ -285,13 +303,18 @@ public class Player : Creature
     #endregion
 
     #region Helper
-    bool IsLeftKeyInput()
+    private bool IsLeftKeyInput()
     {
         return MoveDir.x < 0;
     }
-    bool IsRightKeyInput()
+    private bool IsRightKeyInput()
     {
         return MoveDir.x > 0;
+    }
+
+    private bool IsGroundedWithCoyote()
+    {
+        return IsGrounded || (Time.time - _lastGroundedTime <= PlayerData.CoyoteTimeDuration);
     }
     #endregion
 }

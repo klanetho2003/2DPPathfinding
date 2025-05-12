@@ -3,6 +3,7 @@
     {
       "JumpToMidSpeedThreshold": 1.5,
       "MidToFallSpeedThreshold": -1.5,
+      "CoyoteTimeDuration": 0.1,
       "TemplateId": 10,
       "NameDataId": "PlayerTemp",
       "AnimDataId": "PlayerAnimator",
