@@ -184,6 +184,10 @@ public class Player : Creature
     protected override void UpdateMove()
     {
         if (MoveDir == Vector2.zero) { CreatureState = ECreatureState.Idle; return; }
+
+        // 하강
+        if (RigidBody.linearVelocityY < PlayerMovementData.MidToFallSpeedThreshold)
+            CreatureState = ECreatureState.Fall;
     }
 
     protected override void UpdateJump()
@@ -270,8 +274,10 @@ public class Player : Creature
     {
         _dashTimeLeft -= Time.deltaTime;
 
+        // 벽
         if (OnWall)
             EndDash(ECreatureState.Wall);
+        // Dash Time Out
         else if (_dashTimeLeft <= 0f)
             EndDash(ECreatureState.Move);
     }
