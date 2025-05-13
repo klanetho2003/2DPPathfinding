@@ -1,2 +1,2 @@
-TemplateDataId,NameDataId,AnimDataId,SortingLayerName,ColliderOffsetX,ColliderOffsetY,ColliderSizeX,ColliderSizeY,MaxHp,MaxSpeeed,JumpForce,JumpToMidSpeedThreshold,MidToFallSpeedThreshold,CoyoteTimeDuration
-10,PlayerTemp,PlayerAnimator,Creature,-0.05,0.64,0.7,1.25,100,8,8,1.5,-1.5,0.1
+TemplateDataId,NameDataId,AnimDataId,SortingLayerName,ColliderOffsetX,ColliderOffsetY,ColliderSizeX,ColliderSizeY,MaxHp
+10,PlayerTemp,PlayerAnimator,Creature,-0.05,0.64,0.7,1.25,100

@@ -17,6 +17,7 @@ public class DataManager
     public Dictionary<int, Data.ChildData> ChildDataDic { get; private set; } = new Dictionary<int, Data.ChildData>();
 
     public Dictionary<int, Data.PlayerData> PlayerDataDic { get; private set; } = new Dictionary<int, Data.PlayerData>();
+    public Dictionary<int, Data.PlayerMovementData> PlayerMovementDataDic { get; private set; } = new Dictionary<int, Data.PlayerMovementData>();
 
     public void Init()
     {
@@ -24,6 +25,7 @@ public class DataManager
         // ChildDataDic = LoadJson<Data.ChildDataLoader, int, Data.ChildData>("ChildData").MakeDict();
 
         PlayerDataDic = LoadJson<Data.PlayerDataLoader, int, Data.PlayerData>("PlayerData").MakeDict();
+        PlayerMovementDataDic = LoadJson<Data.PlayerMovementDataLoader, int, Data.PlayerMovementData>("PlayerMovementData").MakeDict();
     }
 
     private Loader LoadJson<Loader, Key, Value>(string path) where Loader : ILoader<Key, Value>

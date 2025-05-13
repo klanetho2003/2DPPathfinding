@@ -43,6 +43,7 @@ namespace Data
     }
     #endregion
 
+    #region Creature Default Data
     [Serializable]
     public class CreatureData
     {
@@ -57,18 +58,13 @@ namespace Data
         public float ColliderSizeX;
         public float ColliderSizeY;
 
-        public float MaxHp;
-        public float MaxSpeed;
-        public float JumpForce;
+        public float MaxHp; // To Do Stat Data로 분리
     }
 
     [Serializable]
     public class PlayerData : CreatureData
     {
-        public float JumpToMidSpeedThreshold; // Threshold : 경계값
-        public float MidToFallSpeedThreshold; // Threshold : 경계값
-
-        public float CoyoteTimeDuration;  // 지면 Check 유예 시간 (초)
+        
     }
 
     [Serializable]
@@ -83,4 +79,43 @@ namespace Data
             return dict;
         }
     }
+    #endregion
+
+    #region Creature Movement Data
+    [Serializable]
+    public class CreatureMovementData
+    {
+        public int TemplateId;
+
+        public float MaxSpeed;
+        public float JumpForce;
+
+        public float JumpToMidSpeedThreshold; // Threshold : 경계값
+        public float MidToFallSpeedThreshold; // Threshold : 경계값
+        public float CoyoteTimeDuration;  // 지면 Check 유예 시간 (초)
+
+        public float DashSpeed;
+        public float DashDuration;
+        public float DashCoolTime;
+    }
+
+    [Serializable]
+    public class PlayerMovementData : CreatureMovementData
+    {
+
+    }
+
+    [Serializable]
+    public class PlayerMovementDataLoader : ILoader<int, PlayerMovementData>
+    {
+        public List<PlayerMovementData> MovementDatas = new List<PlayerMovementData>();
+        public Dictionary<int, PlayerMovementData> MakeDict()
+        {
+            Dictionary<int, PlayerMovementData> dict = new Dictionary<int, PlayerMovementData>();
+            foreach (PlayerMovementData data in MovementDatas)
+                dict.Add(data.TemplateId, data);
+            return dict;
+        }
+    }
+    #endregion
 }

@@ -5,6 +5,7 @@ using static Define;
 public class Creature : BaseController
 {
     public CreatureData CreatureData { get; private set; }
+    public CreatureMovementData CreatureMovementData { get; private set; }
 
     public MoveMentValues MovementValues { get; protected set; }
 
@@ -112,6 +113,7 @@ public class Creature : BaseController
         if (ObjectType == EObjectType.Player)
         {
             CreatureData = Managers.Data.PlayerDataDic[templateID];
+            CreatureMovementData = Managers.Data.PlayerMovementDataDic[templateID];
         }
         else
         {
@@ -136,8 +138,8 @@ public class Creature : BaseController
         // Stat
         Hp = CreatureData.MaxHp;
         MaxHp = CreatureData.MaxHp;
-        MaxSpeed = CreatureData.MaxSpeed;
-        JumpForce = CreatureData.JumpForce;
+        MaxSpeed = CreatureMovementData.MaxSpeed;
+        JumpForce = CreatureMovementData.JumpForce;
 
         // State
         CreatureState = ECreatureState.Idle;
@@ -147,9 +149,6 @@ public class Creature : BaseController
     #region Update & State Method
     protected override void UpdateController()
     {
-        Debug.Log($"Dir : {MoveDir}");
-        Debug.Log($"RawMoveInput : {RawMoveInput}");
-
         // Grounded Check
         UpdateGrounded();
 

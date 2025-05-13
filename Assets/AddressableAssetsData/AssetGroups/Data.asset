@@ -15,6 +15,12 @@ MonoBehaviour:
   m_GroupName: Data
   m_GUID: b7d01224da6bf96468763cd87eecc497
   m_SerializeEntries:
+  - m_GUID: 9905dfd20d4535549a326a3efdbdc34f
+    m_Address: PlayerMovementData
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - PreLoad
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: c8100dbb3267b62419b8616e658d4505
     m_Address: TileHintMapData
     m_ReadOnly: 0

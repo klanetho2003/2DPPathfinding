@@ -1,9 +1,6 @@
 ﻿{
   "PlayersDatas": [
     {
-      "JumpToMidSpeedThreshold": 1.5,
-      "MidToFallSpeedThreshold": -1.5,
-      "CoyoteTimeDuration": 0.1,
       "TemplateId": 10,
       "NameDataId": "PlayerTemp",
       "AnimDataId": "PlayerAnimator",
@@ -12,9 +9,7 @@
       "ColliderOffsetY": 0.64,
       "ColliderSizeX": 0.7,
       "ColliderSizeY": 1.25,
-      "MaxHp": 100.0,
-      "MaxSpeed": 8.0,
-      "JumpForce": 8.0
+      "MaxHp": 100.0
     }
   ]
 }

@@ -1,0 +1,2 @@
+TemplateDataId,MaxSpeeed,JumpForce,JumpToMidSpeedThreshold,MidToFallSpeedThreshold,CoyoteTimeDuration,DashSpeed,DashDuration,DashCoolTime
+10,8,8,1.5,-1.5,0.1,15,0.2,2

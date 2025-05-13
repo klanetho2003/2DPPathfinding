@@ -1,3 +1,4 @@
+using System.Collections;
 using Data;
 using Unity.VisualScripting;
 using UnityEngine;
@@ -6,16 +7,7 @@ using static Define;
 public class Player : Creature
 {
     public PlayerData PlayerData { get { return (PlayerData)CreatureData; } }
-
-    [SerializeField, Tooltip("대쉬 속도")]
-    private float dashSpeed = 20f;
-    [SerializeField, Tooltip("대쉬 지속 시간")]
-    private float dashDuration = 0.2f;
-
-    private bool _isDashing;
-    private float _dashTimeLeft;
-
-
+    public PlayerMovementData PlayerMovementData { get { return (PlayerMovementData)CreatureMovementData; } }
 
     [SerializeField]
     private bool _isJumpKeyDown = false;
@@ -82,6 +74,7 @@ public class Player : Creature
                                 case ECreatureState.Jump:
                                 case ECreatureState.Fall:
                                 case ECreatureState.Wall:
+                                case ECreatureState.Dash:
                                     return;
                             }
                             
@@ -93,10 +86,12 @@ public class Player : Creature
                     }
                     #endregion
 
+                    #region D
                     if (key == EKeyDownEvent.D && CanDash())
                     {
-                        StartDash();
+                        StartDash(RawMoveInput);
                     }
+                    #endregion
                 }
                 break;
             case EKeyInputType.Up:
@@ -120,6 +115,9 @@ public class Player : Creature
     protected override void FixedUpdateController()
     {
         base.FixedUpdateController();
+
+        if (CreatureState == ECreatureState.Dash)
+            RigidBody.linearVelocity = _dashDirection * PlayerMovementData.DashSpeed;
     }
 
     #region Animation
@@ -135,7 +133,7 @@ public class Player : Creature
                 break;
             case ECreatureState.Jump:
                 {
-                    if (RigidBody.linearVelocityY > PlayerData.JumpToMidSpeedThreshold)
+                    if (RigidBody.linearVelocityY > PlayerMovementData.JumpToMidSpeedThreshold)
                         Anim.Play("JumpRise");
                     else
                         Anim.Play("JumpMid");
@@ -146,6 +144,9 @@ public class Player : Creature
                 break;
             case ECreatureState.Wall:
                 Anim.Play("WallClimbIdle");
+                break;
+            case ECreatureState.Dash:
+                Anim.Play("DashLoop");
                 break;
         }
     }
@@ -201,7 +202,7 @@ public class Player : Creature
     protected override void UpdateJump()
     {
         // 하강
-        if (RigidBody.linearVelocityY < PlayerData.MidToFallSpeedThreshold)
+        if (RigidBody.linearVelocityY < PlayerMovementData.MidToFallSpeedThreshold)
             CreatureState = ECreatureState.Fall;
 
         else if (OnLeftWall && IsRightKeyInput()) return;   // Wall Jump를 더 후하게
@@ -278,33 +279,14 @@ public class Player : Creature
             CreatureState = ECreatureState.Fall;
     }
 
-    private void ApplyWallSlide()
-    {
-        // 아래로 떨어지는 중일 때만
-        if (RigidBody.linearVelocityY < 0f)
-        {
-            // 더 빠르게 내려가지 않도록 Clamp
-            float maxDown = -MovementValues.wallSlideMaxSpeed;
-            if (RigidBody.linearVelocityY < maxDown)
-            {
-                RigidBody.linearVelocityY = maxDown;
-            }
-        }
-    }
-
     protected override void UpdateDash()
     {
         _dashTimeLeft -= Time.deltaTime;
-        if (_dashTimeLeft <= 0f)
-        {
-            EndDash();
-        }
-        else
-        {
-            // 계속 대쉬 속도 유지 (To Do : 중력 무시 or 약간만 적용)
-            Vector2 v = RigidBody.linearVelocity;
-            RigidBody.linearVelocity = new Vector2(Mathf.Sign(v.x) * dashSpeed, 0f);
-        }
+
+        if (OnWall)
+            EndDash(ECreatureState.Wall);
+        else if (_dashTimeLeft <= 0f)
+            EndDash(ECreatureState.Move);
     }
     #endregion
 
@@ -338,23 +320,54 @@ public class Player : Creature
     }
     #endregion
 
+    #region Wall
+    private void ApplyWallSlide()
+    {
+        // 아래로 떨어지는 중일 때만
+        if (RigidBody.linearVelocityY < 0f)
+        {
+            // 더 빠르게 내려가지 않도록 Clamp
+            float maxDown = -MovementValues.wallSlideMaxSpeed;
+            if (RigidBody.linearVelocityY < maxDown)
+            {
+                RigidBody.linearVelocityY = maxDown;
+            }
+        }
+    }
+    #endregion
+
     #region Dash Method
-    private void StartDash()
+
+    private float _dashTimeLeft;
+    private Vector2 _dashDirection = Vector2.zero;
+    public float RemainDashCoolTime { get; set; }
+
+    private void StartDash(Vector2 dir)
     {
-        _isDashing = true;
-        _dashTimeLeft = dashDuration;
+        if (dir == Vector2.zero) return;
+
+        _dashTimeLeft = PlayerMovementData.DashDuration;
+        _dashDirection = dir.normalized;
+
+        RigidBody.linearVelocity = Vector2.zero;
+        RigidBody.linearVelocity = dir * PlayerMovementData.DashSpeed;
+
         CreatureState = ECreatureState.Dash;
-
-        Vector2 dir = RawMoveInput.x != 0 ? RawMoveInput.normalized : (LookRight ? Vector2.right : Vector2.left);
-        SetRigidBodyVelocity(dir.x * dashSpeed);
+        StartCoroutine(CoCountdownDashCool());
     }
 
-    private void EndDash()
+    private void EndDash(ECreatureState afterState)
     {
-        _isDashing = false;
-        CreatureState = ECreatureState.Move;
-        // 대쉬 후엔 일반 물리 & gravity 적용
+        CreatureState = afterState;
     }
+
+    private IEnumerator CoCountdownDashCool()
+    {
+        RemainDashCoolTime = PlayerMovementData.DashCoolTime;
+        yield return new WaitForSeconds(RemainDashCoolTime);
+        RemainDashCoolTime = 0;
+    }
+
     #endregion
 
     #region Helper
@@ -379,15 +392,15 @@ public class Player : Creature
 
     private bool IsGroundedWithCoyote()
     {
-        return IsGrounded || (Time.time - _lastGroundedTime <= PlayerData.CoyoteTimeDuration);
+        return IsGrounded || (Time.time - _lastGroundedTime <= PlayerMovementData.CoyoteTimeDuration);
     }
 
     // Dash
     private bool CanDash()
     {
-        // To Do : 지면 혹은 공중 대쉬 허용 여부, 쿨다운 체크 등
+        bool canDash = (RemainDashCoolTime == 0) && (CreatureState != ECreatureState.Dash);
 
-        return !_isDashing;
+        return canDash;
     }
     #endregion
 }
