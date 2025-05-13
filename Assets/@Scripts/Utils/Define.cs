@@ -16,6 +16,7 @@ public class Define
     {
         None = -1,
 
+        D = 1,
         Space = 100,
     }
 
@@ -64,6 +65,7 @@ public class Define
         Jump,
         Fall,
         Wall,
+        Dash,
     }
 
     public enum ETileType

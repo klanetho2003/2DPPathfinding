@@ -13,18 +13,20 @@ public class Creature : BaseController
     protected Vector2 _moveDir = Vector2.zero;
     public Vector2 MoveDir
     {
-        get { return _moveDir; }
+        get { return _moveDir.normalized; }
         set
         {
             if (_moveDir == value) return;
 
-            _moveDir = value.normalized;
+            _moveDir = value;
 
             // Sprite 방향 전환
             if (value.x > 0)        LookRight = true;
             else if (value.x < 0)   LookRight = false;
         }
     }
+
+    public Vector2 RawMoveInput { get { return _moveDir; } }
 
     [SerializeField] // For Debug
     protected bool _isGrounded = false;
@@ -145,6 +147,9 @@ public class Creature : BaseController
     #region Update & State Method
     protected override void UpdateController()
     {
+        Debug.Log($"Dir : {MoveDir}");
+        Debug.Log($"RawMoveInput : {RawMoveInput}");
+
         // Grounded Check
         UpdateGrounded();
 
@@ -168,6 +173,9 @@ public class Creature : BaseController
             case ECreatureState.Wall:
                 UpdateWall();
                 break;
+            case ECreatureState.Dash:
+                UpdateDash();
+                break;
         }
     }
 
@@ -176,6 +184,7 @@ public class Creature : BaseController
     protected virtual void UpdateJump() { }
     protected virtual void UpdateFall() { }
     protected virtual void UpdateWall() { }
+    protected virtual void UpdateDash() { }
 
     protected override void UpdateAnimation() { }
 
@@ -188,7 +197,7 @@ public class Creature : BaseController
         CalculateTargetVelocity();
 
         // if -> 수평 이동 vs 마찰
-        if (!Mathf.Approximately(MoveDir.x, 0f))
+        if (!Mathf.Approximately(RawMoveInput.x, 0f))
         {
             // 이동 방향이 설정_O -> 목표 속도로 설정
             SetRigidBodyVelocity(TargetVelocityX);
@@ -214,7 +223,7 @@ public class Creature : BaseController
     private void CalculateTargetVelocity()
     {
         float accelTime = IsGrounded ? MovementValues.groundAccelTime : MovementValues.airAccelTime;
-        float targetSpeed = MoveDir.x * MaxSpeed;
+        float targetSpeed = RawMoveInput.x * MaxSpeed;
         TargetVelocityX = Mathf.SmoothDamp(RigidBody.linearVelocityX, targetSpeed, ref velocityXSmoothing, accelTime);
     }
 
@@ -225,7 +234,7 @@ public class Creature : BaseController
 
     protected void ApplyGroundFriction()
     {
-        if (!IsGrounded || !Mathf.Approximately(MoveDir.x, 0f))
+        if (!IsGrounded || !Mathf.Approximately(RawMoveInput.x, 0f))
             return;
 
         RigidBody.linearVelocity = new Vector2(

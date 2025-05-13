@@ -41,19 +41,21 @@ public class InputManager
     #region Init
     private void InitMove()
     {
-        _moveAction = new InputAction("Move", InputActionType.Value);
-        _moveAction.AddCompositeBinding("1DAxis")
-            // .With("Negative", "<Keyboard>/a")
-            .With("Negative", "<Keyboard>/leftArrow")
-            // .With("Positive", "<Keyboard>/d")
-            .With("Positive", "<Keyboard>/rightArrow");
+        // _moveAction = new InputAction("Move", InputActionType.Value); // 좌우만
+        _moveAction = new InputAction(name: "Move", type: InputActionType.Value, expectedControlType: "Vector2");
+        _moveAction.AddCompositeBinding("2DVector")
+            .With("Up",     "<Keyboard>/upArrow")
+            .With("Down",   "<Keyboard>/downArrow")
+            .With("Left",   "<Keyboard>/leftArrow")
+            .With("Right",  "<Keyboard>/rightArrow");
+
         _moveAction.Enable();
     }
 
     private void InitKeyBindings()
     {
         AddKey(EKeyDownEvent.Space, Key.Space);
-        // AddKey(KeyDownEvent.Num1, Key.Digit1);
+        AddKey(EKeyDownEvent.D, Key.D);
         // AddKey(KeyDownEvent.R, Key.Digit2);
     }
 
@@ -121,7 +123,7 @@ public class InputManager
     private bool _isMoveKeyPressed = false;
     private static readonly Key[] _moveKeys = new Key[]
     {
-        Key.LeftArrow, Key.RightArrow
+        Key.LeftArrow, Key.RightArrow, Key.UpArrow, Key.DownArrow
     };
 
     private void HandleMoveInput()
@@ -147,19 +149,17 @@ public class InputManager
             return;
         }
 
-        float dir = _moveAction.ReadValue<float>();
-        switch (dir)
-        {
-            case > 0:
-                Managers.Game.MoveDir = Vector2.right;
-                break;
-            case < 0:
-                Managers.Game.MoveDir = Vector2.left;
-                break;
-            default: // 0
-                Managers.Game.MoveDir = Vector2.zero;
-                break;
-        }
+        // 1) Vector2로 입력 읽기
+        Vector2 input = _moveAction.ReadValue<Vector2>();
+        float vx =  input.x > 0 ?
+                    1f  : input.x < 0 ?
+                    -1f : 0f;
+        float vy =  input.y > 0 ?
+                    1f  : input.y < 0 ?
+                    -1f : 0f;
+
+        // 2) 최종 이동 방향 설정
+        Managers.Game.MoveDir = new Vector2(vx, vy);
     }
     #endregion
 }
