@@ -11,6 +11,8 @@ public class Creature : BaseController
 
     public float TargetVelocityX { get; protected set; }
 
+    protected float _lastGroundedTime; // 마지막으로 지면에 닿은 시점 to Coyote
+
     protected Vector2 _moveDir = Vector2.zero;
     public Vector2 MoveDir
     {
@@ -118,6 +120,8 @@ public class Creature : BaseController
         else
         {
             // To Do Others
+            CreatureData = Managers.Data.PlayerDataDic[templateID];
+            CreatureMovementData = Managers.Data.PlayerMovementDataDic[templateID];
         }
 
         gameObject.name = $"{CreatureData.TemplateId}_{CreatureData.NameDataId}"; // To Do : string data sheet
@@ -155,6 +159,9 @@ public class Creature : BaseController
         // OnWall Check
         UpdateOnWall();
 
+        // lastGroundedTime 갱신
+        UpdateCoyoteTimer();
+
         switch (CreatureState)
         {
             case ECreatureState.Idle:
@@ -176,6 +183,15 @@ public class Creature : BaseController
                 UpdateDash();
                 break;
         }
+    }
+
+    protected virtual void UpdateCoyoteTimer()
+    {
+        // 지면에 닿을 때마다 시간 리셋
+        if (IsGrounded == false)
+            return;
+
+        _lastGroundedTime = Time.time;
     }
 
     protected virtual void UpdateIdle() { }
@@ -297,4 +313,11 @@ public class Creature : BaseController
         Gizmos.DrawLine(_onWallCheck_LineLeft_StartPos, _onWallCheck_LineLeft_StartPos + Vector2.left * 0.1f);
         Gizmos.DrawLine(_onWallCheck_LineRight_StartPos, _onWallCheck_LineRight_StartPos + Vector2.right * 0.1f);
     }
+
+    #region Helper
+    protected bool IsGroundedWithCoyote()
+    {
+        return IsGrounded || (Time.time - _lastGroundedTime <= CreatureMovementData.CoyoteTimeDuration);
+    }
+    #endregion
 }

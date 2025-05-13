@@ -9,10 +9,7 @@ public class Player : Creature
     public PlayerData PlayerData { get { return (PlayerData)CreatureData; } }
     public PlayerMovementData PlayerMovementData { get { return (PlayerMovementData)CreatureMovementData; } }
 
-    [SerializeField]
     private bool _isJumpKeyDown = false;
-
-    private float _lastGroundedTime; // 마지막으로 지면에 닿은 시점
 
     #region Init & SetInfo
     public override bool Init()
@@ -34,6 +31,7 @@ public class Player : Creature
     {
         base.SetInfo(templateID);
 
+        Managers.Input.OnKeyInputHandler -= HandleOnKeyInputHandler;
         Managers.Input.OnKeyInputHandler += HandleOnKeyInputHandler;
     }
     #endregion
@@ -86,7 +84,7 @@ public class Player : Creature
                     }
                     #endregion
 
-                    #region D
+                    #region D - Dash
                     if (key == EKeyDownEvent.D && CanDash())
                     {
                         StartDash(RawMoveInput);
@@ -155,17 +153,6 @@ public class Player : Creature
     protected override void UpdateController()
     {
         base.UpdateController();
-
-        UpdateCoyoteTimer(); // lastGroundedTime 갱신
-    }
-
-    private void UpdateCoyoteTimer()
-    {
-        // 지면에 닿을 때마다 시간을 리셋
-        if (IsGrounded == false)
-            return;
-        
-        _lastGroundedTime = Time.time;
     }
 
     #region State Pattern
@@ -388,11 +375,6 @@ public class Player : Creature
     private bool IsRightKeyInput()
     {
         return MoveDir.x > 0;
-    }
-
-    private bool IsGroundedWithCoyote()
-    {
-        return IsGrounded || (Time.time - _lastGroundedTime <= PlayerMovementData.CoyoteTimeDuration);
     }
 
     // Dash

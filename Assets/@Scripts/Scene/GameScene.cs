@@ -18,6 +18,7 @@ public class GameScene : BaseScene
         _currnetTileGraph = Managers.Map.LoadMap("BaseMap");
 
         Managers.Object.Spawn<Player>(new Vector3(-2.5f, -4), 10); // 10 -> Player Id
+        Managers.Object.Spawn<Enemy>(new Vector3(-2.5f, -4), 10); // 10 -> To Do
 
         return true;
     }

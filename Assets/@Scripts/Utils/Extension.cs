@@ -32,6 +32,15 @@ public static class Extension
         return go != null && go.activeSelf;
     }
 
+    public static bool IsValid(this Player player)
+    {
+        // To Do
+        /*if (player.CreatureState == ECreatureState.Dead)
+            return false;*/
+
+        return player != null && player.gameObject.activeSelf;
+    }
+
     public static void MakeMask(this ref LayerMask mask, List<Define.ELayer> list)
     {
         foreach (Define.ELayer layer in list)

@@ -55,6 +55,7 @@ public class Define
     {
         None,
         Player,
+        Enemy,
     }
 
     public enum ECreatureState

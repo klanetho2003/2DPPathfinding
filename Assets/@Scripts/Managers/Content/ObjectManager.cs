@@ -7,7 +7,7 @@ using static Define;
 public class ObjectManager
 {
     public Player Player { get; private set; }
-    public HashSet<BaseController> TempObejects { get; } = new HashSet<BaseController>();
+    public HashSet<BaseController> Enemys { get; } = new HashSet<BaseController>();
 
     public GameObject SpawnGameObject(Vector3 position, string prefabName)
     {
@@ -33,12 +33,11 @@ public class ObjectManager
             player.SetInfo(templateID);
         }
 
-        // To Do : Monster
-        else if (obj.ObjectType == EObjectType.None)
+        else if (obj.ObjectType == EObjectType.Enemy)
         {
-            BaseController temp = go.GetComponent<BaseController>();
-            TempObejects.Add(temp);
-            // temp.SetInfo(templateID);
+            Enemy enemy = go.GetComponent<Enemy>();
+            Enemys.Add(enemy);
+            enemy.SetInfo(templateID);
         }
 
         return obj as T;
@@ -60,7 +59,7 @@ public class ObjectManager
         else if (obj.ObjectType == EObjectType.None)
         {
             BaseController temp = obj.GetComponent<BaseController>();
-            TempObejects.Remove(temp);
+            Enemys.Remove(temp);
         }
 
         // To Pool
@@ -75,7 +74,7 @@ public class ObjectManager
 
     public void DespawnAllTemps()
     {
-        var temps = TempObejects.ToList();
+        var temps = Enemys.ToList();
 
         foreach (var temp in temps)
             Managers.Object.Despawn(temp);

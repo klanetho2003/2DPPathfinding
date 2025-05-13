@@ -21,6 +21,12 @@ MonoBehaviour:
     m_SerializedLabels:
     - PreLoad
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 68d935b3659bea9459343d06689f6353
+    m_Address: Enemy
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - PreLoad
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 8fe1a1a9cf68c6840a2027834a57326f
     m_Address: BaseMap
     m_ReadOnly: 0
