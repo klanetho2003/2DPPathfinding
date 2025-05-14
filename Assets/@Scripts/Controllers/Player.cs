@@ -190,14 +190,9 @@ public class Player : Creature
         }
     }
 
-    protected override void UpdateIdle()
-    {
-        if (MoveDir != Vector2.zero) { CreatureState = ECreatureState.Move; return; }
-    }
-
     protected override void UpdateMove()
     {
-        if (MoveDir == Vector2.zero) { CreatureState = ECreatureState.Idle; return; }
+        base.UpdateMove();
 
         // 하강
         if (RigidBody.linearVelocityY < PlayerMovementData.MidToFallSpeedThreshold)

@@ -117,8 +117,8 @@
             },
             "x": -13,
             "y": -5,
-            "TileType": 1,
-            "requiredJumpPower": 5.0
+            "TileType": 0,
+            "requiredJumpPower": 0.0
         },
         {
             "bc": {
@@ -141,8 +141,8 @@
             },
             "x": -11,
             "y": -5,
-            "TileType": 0,
-            "requiredJumpPower": 0.0
+            "TileType": 1,
+            "requiredJumpPower": 5.0
         },
         {
             "bc": {
@@ -309,8 +309,8 @@
             },
             "x": 3,
             "y": -5,
-            "TileType": 0,
-            "requiredJumpPower": 0.0
+            "TileType": 1,
+            "requiredJumpPower": 5.0
         },
         {
             "bc": {
@@ -321,8 +321,8 @@
             },
             "x": 4,
             "y": -5,
-            "TileType": 0,
-            "requiredJumpPower": 0.0
+            "TileType": 1,
+            "requiredJumpPower": 5.0
         },
         {
             "bc": {
@@ -333,8 +333,8 @@
             },
             "x": 5,
             "y": -5,
-            "TileType": 1,
-            "requiredJumpPower": 5.0
+            "TileType": 0,
+            "requiredJumpPower": 0.0
         },
         {
             "bc": {

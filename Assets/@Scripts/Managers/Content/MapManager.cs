@@ -23,7 +23,6 @@ namespace MapHelper
         public float requiredJumpPower;
 
         #region Helpers
-
         public List<BaseController> ReturnAllObject()
         {
             return _objects.ToList();
@@ -69,7 +68,6 @@ namespace MapHelper
                     break;
             }
         }
-
         #endregion
 
         public void Clear()
@@ -365,6 +363,32 @@ public class MapManager
         return cell;
     }
 
+    public bool TryGetEdge(Vector3Int from, Vector3Int to, out CellEdge edge)
+    {
+        edge = null;
+
+        // 유효한 from 포지션인지 체크
+        if (TileMapData.EdgeMap.TryGetValue(from, out List<CellEdge> edges) == false)
+            return false;
+
+        // 해당 from 에서 to 로 향하는 간선이 있는지 확인
+        foreach (var e in edges)
+        {
+            if (e.to == to)
+            {
+                edge = e;
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    public void TryGetEdge()
+    {
+
+    }
+
     public bool RemoveObject(BaseController obj)
     {
         Cell cell = GetCell(obj.CellPos);
@@ -414,70 +438,95 @@ public class MapManager
         }
     }
 
-    public List<Vector3Int> FindPathSideView(BaseController self, Vector3Int start, Vector3Int dest, int maxDepth = 10)
+    public List<Vector3Int> FindPath(Creature self, Vector3Int startCellPos, Vector3Int destCellPos, int maxDepth = 20)
     {
-        Dictionary<Vector3Int, Vector3Int> parent = new();
+        var tileMap = TileMapData;
+        if (!tileMap.EdgeMap.ContainsKey(startCellPos))
+            return new List<Vector3Int>();
+
         Dictionary<Vector3Int, int> best = new();
+        Dictionary<Vector3Int, Vector3Int> parent = new();
         PriorityQueue<PQNode> pq = new();
 
-        Vector3Int pos = start;
-        Vector3Int closest = start;
-        int closestH = (dest - pos).sqrMagnitude;
+        Vector3Int closestCell = startCellPos;
+        int closestH = (destCellPos - startCellPos).sqrMagnitude;
 
-        pq.Push(new PQNode { H = closestH, CellPos = pos, Depth = 0 });
-        parent[pos] = pos;
-        best[pos] = closestH;
+        pq.Push(new PQNode { H = closestH, CellPos = startCellPos, Depth = 1 });
+        parent[startCellPos] = startCellPos;
+        best[startCellPos] = closestH;
 
         while (pq.Count > 0)
         {
-            PQNode node = pq.Pop();
-            pos = node.CellPos;
+            var node = pq.Pop();
+            Vector3Int current = node.CellPos;
 
-            if (pos == dest)
+            if (current == destCellPos)
                 break;
 
             if (node.Depth >= maxDepth)
                 continue;
 
-            foreach (int dx in new[] { -1, 1 }) // Only left/right
+            if (!tileMap.EdgeMap.TryGetValue(current, out var edges))
+                continue;
+
+            foreach (var edge in edges)
             {
-                Vector3Int next = new Vector3Int(pos.x + dx, pos.y, 0);
+                Vector3Int next = edge.to;
 
-                if (CanGo(self, next) == false)
-                    continue;
+                // 점프 조건
+                if (edge.edgeType == EdgeType.Jump)
+                {
+                    if (!tileMap.CellMap.TryGetValue(current, out var fromCell))
+                        continue;
+                    if (fromCell.TileType != ETileType.Jumpable)
+                        continue;
+                    if (edge.cost > self.CreatureMovementData.JumpForce)
+                        continue;
+                }
 
-                int h = (dest - next).sqrMagnitude;
+                // Horizontal 전용 - 수평이면서 갈 수 있는지 확인
+                if (edge.edgeType == EdgeType.Horizontal)
+                {
+                    if (CanGo(self, next) == false)
+                        continue;
+                }
 
-                if (best.TryGetValue(next, out int existing) && existing <= h)
+                int h = (destCellPos - next).sqrMagnitude;
+
+                if (best.TryGetValue(next, out int oldH) && oldH <= h)
                     continue;
 
                 best[next] = h;
-                parent[next] = pos;
                 pq.Push(new PQNode { H = h, CellPos = next, Depth = node.Depth + 1 });
+                parent[next] = current;
 
                 if (h < closestH)
                 {
                     closestH = h;
-                    closest = next;
+                    closestCell = next;
                 }
             }
         }
 
-        return ReconstructPath(parent, parent.ContainsKey(dest) ? dest : closest);
+        if (parent.ContainsKey(destCellPos))
+            return CalcCellPathFromParent(parent, destCellPos);
+
+        return CalcCellPathFromParent(parent, closestCell);
     }
 
-    private List<Vector3Int> ReconstructPath(Dictionary<Vector3Int, Vector3Int> parent, Vector3Int dest)
+    List<Vector3Int> CalcCellPathFromParent(Dictionary<Vector3Int, Vector3Int> parent, Vector3Int dest)
     {
         List<Vector3Int> path = new();
         if (!parent.ContainsKey(dest)) return path;
 
-        Vector3Int cur = dest;
-        while (parent[cur] != cur)
+        Vector3Int current = dest;
+        while (parent[current] != current)
         {
-            path.Add(cur);
-            cur = parent[cur];
+            path.Add(current);
+            current = parent[current];
         }
 
+        path.Add(current);
         path.Reverse();
         return path;
     }

@@ -195,8 +195,14 @@ public class Creature : BaseController
         _lastGroundedTime = Time.time;
     }
 
-    protected virtual void UpdateIdle() { }
-    protected virtual void UpdateMove() { }
+    protected virtual void UpdateIdle()
+    {
+        if (MoveDir != Vector2.zero) { CreatureState = ECreatureState.Move; return; }
+    }
+    protected virtual void UpdateMove()
+    {
+        if (MoveDir == Vector2.zero) { CreatureState = ECreatureState.Idle; return; }
+    }
     protected virtual void UpdateJump() { }
     protected virtual void UpdateFall() { }
     protected virtual void UpdateWall() { }
@@ -263,7 +269,7 @@ public class Creature : BaseController
     #region Jump Method
     protected virtual void DoJump(Vector2 dir, float force)
     {
-        if (dir == Vector2.zero || force == 0) return;
+        if (Mathf.Abs(dir.y) <= 0.1f  || force == 0) return;
 
         RigidBody.linearVelocity += dir * force;
 
@@ -315,7 +321,7 @@ public class Creature : BaseController
             return EFindPathResult.Fail_LerpCell;
 
         // A*
-        List<Vector3Int> path = Managers.Map.FindPathSideView(this, CellPos, destCellPos, maxDepth);
+        List<Vector3Int> path = Managers.Map.FindPath(this, CellPos, destCellPos, maxDepth);
         if (path.Count < 2)
             return EFindPathResult.Fail_NoPath;
 
