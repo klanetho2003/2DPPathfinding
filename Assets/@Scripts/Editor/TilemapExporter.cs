@@ -34,7 +34,7 @@ public class TilemapExporter : EditorWindow
             return;
         }
 
-        TileNodeList tileList = new TileNodeList();
+        TileNodeData tileList = new TileNodeData();
 
         BoundsInt bounds = tilemap.cellBounds;
         for (int y = bounds.yMax; y >= bounds.yMin; y--)
@@ -46,7 +46,7 @@ public class TilemapExporter : EditorWindow
 
                 if (baseTile is CustomTile customTile)
                 {
-                    TileNode node = new TileNode
+                    Cell node = new Cell
                     {
                         x = x,
                         y = y,
@@ -55,7 +55,7 @@ public class TilemapExporter : EditorWindow
                         // To Do : 임의값으로 하지 말 것, Tile 점과 점 사이 거리 계산
                         requiredJumpPower = customTile.requiredJumpPower
                     };
-                    tileList.tiles.Add(node);
+                    tileList.TileNodes.Add(node);
                 }
             }
         }

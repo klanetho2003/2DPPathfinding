@@ -118,6 +118,20 @@ public class Player : Creature
             RigidBody.linearVelocity = _dashDirection * PlayerMovementData.DashSpeed;
     }
 
+    protected override void UpdateGrounded()
+    {
+        RaycastHit2D hit = Physics2D.Raycast(transform.position, Vector2.down, 0.1f, _groundLayer);
+
+        IsGrounded = hit;
+
+        // CellPos Change
+        if (IsGrounded == false) return;
+
+        Vector3Int CellPos = Managers.Map.World2Cell(hit.point);
+
+        Managers.Map.MoveTo(this, CellPos);
+    }
+
     #region Animation
     protected override void UpdateAnimation()
     {

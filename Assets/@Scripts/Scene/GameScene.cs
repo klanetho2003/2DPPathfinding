@@ -6,7 +6,7 @@ using static Define;
 
 public class GameScene : BaseScene
 {
-    TileGraph _currnetTileGraph;
+    TileMapData _currnetTileGraph;
 
     public override bool Init()
     {
@@ -17,8 +17,10 @@ public class GameScene : BaseScene
 
         _currnetTileGraph = Managers.Map.LoadMap("BaseMap");
 
-        Managers.Object.Spawn<Player>(new Vector3(-2.5f, -4), 10); // 10 -> Player Id
-        Managers.Object.Spawn<Enemy>(new Vector3(-2.5f, -4), 10); // 10 -> To Do
+        Player player = Managers.Object.Spawn<Player>(new Vector3Int(-2, -4), 10); // 10 -> Player Id
+        
+        Enemy enemy = Managers.Object.Spawn<Enemy>(new Vector3(4, -3), 10); // 10 -> To Do
+        // Managers.Map.MoveTo(enemy, new Vector3Int(-2, -3));
 
         return true;
     }
@@ -40,7 +42,7 @@ public class GameScene : BaseScene
 
         // 1. 노드 표시
         Gizmos.color = Color.yellow;
-        foreach (var node in _currnetTileGraph.nodes)
+        foreach (var node in _currnetTileGraph.Cells)
         {
             Vector3 pos = new Vector3(node.x + 0.5f, node.y + 0.5f, 0);
             Gizmos.DrawCube(pos, Vector3.one * nodeSize);
@@ -54,7 +56,7 @@ public class GameScene : BaseScene
         }
 
         // 2. 간선 표시
-        foreach (var edge in _currnetTileGraph.edges)
+        foreach (var edge in _currnetTileGraph.Edges)
         {
             Vector3 from = new Vector3(edge.from.x + 0.5f, edge.from.y + 0.5f, 0);
             Vector3 to = new Vector3(edge.to.x + 0.5f, edge.to.y + 0.5f, 0);

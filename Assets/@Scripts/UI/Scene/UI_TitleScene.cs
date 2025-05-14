@@ -56,7 +56,7 @@ public class UI_TitleScene : UI_Scene
                 }
 
                 // Loading에서 할 필요가 있는 무거운 작업
-                Managers.Map.ParseMapGraphData(/*map, mapName*/); // To Do : Stage 늘어날 시 Stage or Map별로 분기
+                Managers.Map.ParseMapData(/*map, mapName*/); // To Do : Stage 늘어날 시 Stage or Map별로 분기
 
                 GetObject((int)GameObjects.TouchArea).gameObject.SetActive(true);
                 GetText((int)Texts.Text).text = "Click To Start";

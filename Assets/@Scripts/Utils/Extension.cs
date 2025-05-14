@@ -32,13 +32,13 @@ public static class Extension
         return go != null && go.activeSelf;
     }
 
-    public static bool IsValid(this Player player)
+    public static bool IsValid(this BaseController bc)
     {
         // To Do
         /*if (player.CreatureState == ECreatureState.Dead)
             return false;*/
 
-        return player != null && player.gameObject.activeSelf;
+        return bc != null && bc.gameObject.activeSelf;
     }
 
     public static void MakeMask(this ref LayerMask mask, List<Define.ELayer> list)

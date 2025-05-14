@@ -92,6 +92,15 @@ public class Define
         Water = 4,
         UI = 5,
         Ground = 6,
+        Creature = 7,
+    }
+
+    public enum EFindPathResult
+    {
+        Fail_LerpCell,
+        Fail_NoPath,
+        Fail_MoveTo,
+        Success,
     }
 
     // Hard Coding
@@ -99,4 +108,6 @@ public class Define
     {
         public const int CREATURE = 100;
     }
+
+    public const int MONSTER_DEFAULT_MOVE_DEPTH = 10;
 }

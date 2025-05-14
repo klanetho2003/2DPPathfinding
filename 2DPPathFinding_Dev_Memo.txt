@@ -5,3 +5,9 @@ To Do
 ※주의, Frame 제한을 안 걸어둬서 기기별로 Movement 벨런스 값은 Scriptable Object로 조절할 필요 있음
 + Movement에 영향을 미치는 값들 같이 실시간을 조정해야하는 값들은 Scriptable Obejct에서,
 + Hp, MaxSpeed 벨런스 Data 같이 거의 고정 값인 경우에는 Data Sheet에서 조정
+
+
+
+
+Player는 CellPos를 갱신해도 문제가 없음. LerpToCellPos를 안 하기 때문.
+하지만 Enemy는 문제가 생김. LerpToCellPos를 사용해서 CellPos로 이동하기 때문

@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using Data;
 using UnityEngine;
 using static Define;
@@ -89,7 +90,7 @@ public class Creature : BaseController
 
     #region Caching
 
-    private LayerMask _groundLayer;
+    protected LayerMask _groundLayer;
 
     #endregion
 
@@ -231,7 +232,7 @@ public class Creature : BaseController
     #region Move Method
     protected virtual void UpdateGrounded()
     {
-        IsGrounded = Physics2D.Raycast(transform.position, Vector2.down, 0.1f, _groundLayer);
+        IsGrounded  = Physics2D.Raycast(transform.position, Vector2.down, 0.1f, _groundLayer);
     }
 
     private float velocityXSmoothing;
@@ -301,6 +302,51 @@ public class Creature : BaseController
 
     #endregion
 
+    #region Map
+    public EFindPathResult FindPathAndMoveToCellPos(Vector3 destWorldPos, int maxDepth, bool forceMoveCloser = false)
+    {
+        Vector3Int destCellPos = Managers.Map.World2Cell(destWorldPos);
+        return FindPathAndMoveToCellPos(destCellPos, maxDepth, forceMoveCloser);
+    }
+
+    public EFindPathResult FindPathAndMoveToCellPos(Vector3Int destCellPos, int maxDepth, bool forceMoveCloser = false)
+    {
+        if (LerpCellPosCompleted == false)
+            return EFindPathResult.Fail_LerpCell;
+
+        // A*
+        List<Vector3Int> path = Managers.Map.FindPathSideView(this, CellPos, destCellPos, maxDepth);
+        if (path.Count < 2)
+            return EFindPathResult.Fail_NoPath;
+
+        if (forceMoveCloser)
+        {
+            Vector3Int diff1 = CellPos - destCellPos;
+            Vector3Int diff2 = path[1] - destCellPos;
+            if (diff1.sqrMagnitude <= diff2.sqrMagnitude)
+                return EFindPathResult.Fail_NoPath;
+        }
+
+        Vector3Int dirCellPos = path[1] - CellPos;
+        //
+        Vector3Int nextPos = CellPos + dirCellPos;
+
+        if (Managers.Map.MoveTo(this, nextPos) == false)
+            return EFindPathResult.Fail_MoveTo;
+
+        return EFindPathResult.Success;
+    }
+
+    /*public bool MoveToCellPos(Vector3Int destCellPos, int maxDepth, bool forceMoveCloser = false)
+    {
+        if (LerpCellPosCompleted == false)
+            return false;
+
+        return Managers.Map.MoveTo(this, destCellPos);
+    }*/
+    #endregion
+
+    #if UNITY_EDITOR
     // Gizmo to Debug
     void OnDrawGizmos()
     {
@@ -313,6 +359,7 @@ public class Creature : BaseController
         Gizmos.DrawLine(_onWallCheck_LineLeft_StartPos, _onWallCheck_LineLeft_StartPos + Vector2.left * 0.1f);
         Gizmos.DrawLine(_onWallCheck_LineRight_StartPos, _onWallCheck_LineRight_StartPos + Vector2.right * 0.1f);
     }
+    #endif
 
     #region Helper
     protected bool IsGroundedWithCoyote()
