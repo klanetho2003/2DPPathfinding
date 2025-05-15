@@ -7,30 +7,24 @@ public class Enemy : Creature
 {
     public virtual Player Target { get; private set; }
 
-    public PlayerMovementData PlayerMovementData { get { return (PlayerMovementData)CreatureMovementData; } }
+    public EnemyMovementData EnemyMovementData { get { return (EnemyMovementData)CreatureMovementData; } }
 
     private List<Vector3Int> _pathCells = new();
     private int _pathIndex = 0;
-
-    private float _pathUpdateInterval = 0.5f;
     private float _pathUpdateTimer = 0f;
 
-    [SerializeField]
     private bool _shouldJump = false;
     private Vector2 _jumpDir = Vector2.zero;
     private float _jumpPower = 0f;
-    [SerializeField]
     Vector3Int _stepPos = Vector3Int.zero;
 
+    #region Init & SetInfo
     public override bool Init()
     {
         if (base.Init() == false)
             return false;
 
         ObjectType = EObjectType.Enemy;
-
-        // To Do -> Temp
-        MovementValues = Managers.Resource.Load<MoveMentValues>($"MoveMentValues_{EObjectType.Player}");
 
         return true;
     }
@@ -46,6 +40,52 @@ public class Enemy : Creature
         excludeMask.AddLayer(ELayer.Creature);
         Collider.excludeLayers = excludeMask;
     }
+    #endregion
+
+    #region Update
+    protected override void UpdateController()
+    {
+        if (Target.IsValid() == false)
+            return;
+
+        base.UpdateController();
+    }
+
+    protected override void FixedUpdateController()
+    {
+        if (Target == null)
+            return;
+
+        base.FixedUpdateController();
+
+        _pathUpdateTimer += Time.fixedDeltaTime;
+        if (_pathUpdateTimer >= EnemyMovementData.PathUpdateInterval)
+        {
+            _pathUpdateTimer = 0f;
+            UpdatePath();
+        }
+
+        // 점프 필요 여부 확인 및 값 세팅
+        MoveAlongPath();
+
+        // 점프 실행 조건 최종 확인
+        if (_shouldJump && _pathCells != null && _pathIndex < _pathCells.Count)
+        {
+            Vector3Int jumpTargetCell = _pathCells[_pathIndex];
+
+            if (jumpTargetCell.y > _stepPos.y)
+            {
+                DoJump(_jumpDir, _jumpPower);
+                ClearJumpReservation();
+            }
+        }
+        else
+        {
+            // 경로가 끝났거나 유효하지 않으면 예약 제거
+            ClearJumpReservation();
+        }
+    }
+    #endregion
 
     #region Animation
     protected override void UpdateAnimation()
@@ -60,7 +100,7 @@ public class Enemy : Creature
                 break;
             case ECreatureState.Jump:
                 {
-                    if (RigidBody.linearVelocityY > PlayerMovementData.JumpToMidSpeedThreshold)
+                    if (RigidBody.linearVelocityY > EnemyMovementData.JumpToMidSpeedThreshold)
                         Anim.Play("JumpRise");
                     else
                         Anim.Play("JumpMid");
@@ -79,18 +119,20 @@ public class Enemy : Creature
     }
     #endregion
 
-    protected override void UpdateController()
+    #region State Pattern
+    protected override void UpdateIdle()
     {
-        if (Target.IsValid() == false)
-            return;
+        base.UpdateIdle();
 
-        base.UpdateController();
+        // 하강
+        if (RigidBody.linearVelocityY < EnemyMovementData.MidToFallSpeedThreshold)
+            CreatureState = ECreatureState.Fall;
     }
 
     protected override void UpdateJump()
     {
         // 하강
-        if (RigidBody.linearVelocityY < PlayerMovementData.MidToFallSpeedThreshold)
+        if (RigidBody.linearVelocityY < EnemyMovementData.MidToFallSpeedThreshold)
             CreatureState = ECreatureState.Fall;
 
         // 착지
@@ -107,46 +149,9 @@ public class Enemy : Creature
         if (IsGrounded)
             CreatureState = ECreatureState.Idle;
     }
+    #endregion
 
-    protected override void FixedUpdateController()
-    {
-        if (Target == null)
-            return;
-
-        base.FixedUpdateController();
-
-        _pathUpdateTimer += Time.fixedDeltaTime;
-        if (_pathUpdateTimer >= _pathUpdateInterval)
-        {
-            _pathUpdateTimer = 0f;
-            UpdatePath();
-        }
-
-        // 점프 필요 여부 확인 및 값 세팅
-        MoveAlongPath();
-
-        // 점프 실행 조건 최종 확인
-        if (_shouldJump && _pathCells != null && _pathIndex < _pathCells.Count)
-        {
-            Vector3Int jumpTargetCell = _pathCells[_pathIndex];
-
-            if (jumpTargetCell.y > _stepPos.y)
-            {
-                DoJump(_jumpDir, _jumpPower);
-                _shouldJump = false;
-                _jumpPower = 0f;
-                _jumpDir = Vector2.zero;
-            }
-        }
-        else
-        {
-            // 경로가 끝났거나 유효하지 않으면 예약 제거
-            _shouldJump = false;
-            _jumpPower = 0f;
-            _jumpDir = Vector2.zero;
-        }
-    }
-
+    #region Jump
     protected override void DoJump(Vector2 dir, float force)
     {
         if (dir == Vector2.zero || force <= 0f)
@@ -163,7 +168,9 @@ public class Enemy : Creature
 
         CreatureState = ECreatureState.Jump;
     }
+    #endregion
 
+    #region Find Path
     private void UpdatePath()
     {
         Vector3Int start = Managers.Map.World2Cell(transform.position);
@@ -228,8 +235,15 @@ public class Enemy : Creature
             _jumpDir = (worldTarget - transform.position).normalized;
         }
     }
+    private void ClearJumpReservation()
+    {
+        _shouldJump = false;
+        _jumpDir = Vector2.zero;
+        _jumpPower = 0f;
+    }
+    #endregion
 
-    #if UNITY_EDITOR
+#if UNITY_EDITOR
     private void OnDrawGizmosSelected()
     {
         if (_pathCells == null) return;

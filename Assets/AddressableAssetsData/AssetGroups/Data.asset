@@ -15,6 +15,12 @@ MonoBehaviour:
   m_GroupName: Data
   m_GUID: b7d01224da6bf96468763cd87eecc497
   m_SerializeEntries:
+  - m_GUID: 846a6b0c14bbc0545afb58f0e29630e0
+    m_Address: EnemyMovementData
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - PreLoad
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 9905dfd20d4535549a326a3efdbdc34f
     m_Address: PlayerMovementData
     m_ReadOnly: 0

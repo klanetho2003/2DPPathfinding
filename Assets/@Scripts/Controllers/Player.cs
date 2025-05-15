@@ -11,30 +11,6 @@ public class Player : Creature
 
     private bool _isJumpKeyDown = false;
 
-    #region Init & SetInfo
-    public override bool Init()
-    {
-        if (base.Init() == false)
-            return false;
-
-        ObjectType = EObjectType.Player;
-
-        Managers.Game.OnMoveDirChanged -= HandleOnMoveDirChange;
-        Managers.Game.OnMoveDirChanged += HandleOnMoveDirChange;
-
-        MovementValues = Managers.Resource.Load<MoveMentValues>($"MoveMentValues_{ObjectType}");
-
-        return true;
-    }
-
-    public override void SetInfo(int templateID)
-    {
-        base.SetInfo(templateID);
-
-        Managers.Input.OnKeyInputHandler -= HandleOnKeyInputHandler;
-        Managers.Input.OnKeyInputHandler += HandleOnKeyInputHandler;
-    }
-    #endregion
 
     #region Event Handling
     void HandleOnMoveDirChange(Vector2 dir)
@@ -54,17 +30,17 @@ public class Player : Creature
                     {
                         Vector2 jumpDir = Vector2.zero;
                         float force = JumpForce;
-                        
+
                         if (IsGrounded == false && CanLeftWallJump())
                         {
                             jumpDir = new Vector2(1f, 2f);
-                            force = force  * 1.5f;
-                        }   
+                            force = force * 1.5f;
+                        }
                         else if (IsGrounded == false && CanRightWallJump())
                         {
                             jumpDir = new Vector2(-1f, 2f);
                             force = force * 1.5f;
-                        }   
+                        }
                         else if (IsGroundedWithCoyote())
                         {
                             switch (CreatureState)
@@ -75,7 +51,7 @@ public class Player : Creature
                                 case ECreatureState.Dash:
                                     return;
                             }
-                            
+
                             jumpDir = Vector2.up;
                         }
 
@@ -110,6 +86,35 @@ public class Player : Creature
     }
     #endregion
 
+    #region Init & SetInfo
+    public override bool Init()
+    {
+        if (base.Init() == false)
+            return false;
+
+        ObjectType = EObjectType.Player;
+
+        Managers.Game.OnMoveDirChanged -= HandleOnMoveDirChange;
+        Managers.Game.OnMoveDirChanged += HandleOnMoveDirChange;
+
+        return true;
+    }
+
+    public override void SetInfo(int templateID)
+    {
+        base.SetInfo(templateID);
+
+        Managers.Input.OnKeyInputHandler -= HandleOnKeyInputHandler;
+        Managers.Input.OnKeyInputHandler += HandleOnKeyInputHandler;
+    }
+    #endregion
+
+    #region Update
+    protected override void UpdateController()
+    {
+        base.UpdateController();
+    }
+
     protected override void FixedUpdateController()
     {
         base.FixedUpdateController();
@@ -129,18 +134,15 @@ public class Player : Creature
 
         Managers.Map.MoveTo(this, CellPos);
     }
+    #endregion
 
     #region Animation
     protected override void UpdateAnimation()
     {
         switch (CreatureState)
         {
-            case ECreatureState.Idle:
-                Anim.Play("Idle");
-                break;
-            case ECreatureState.Move:
-                Anim.Play("Run");
-                break;
+            case ECreatureState.Idle:   Anim.Play("Idle");      break;
+            case ECreatureState.Move:   Anim.Play("Run");       break;
             case ECreatureState.Jump:
                 {
                     if (RigidBody.linearVelocityY > PlayerMovementData.JumpToMidSpeedThreshold)
@@ -149,37 +151,22 @@ public class Player : Creature
                         Anim.Play("JumpMid");
                 }
                 break;
-            case ECreatureState.Fall:
-                Anim.Play("JumpFall");
-                break;
-            case ECreatureState.Wall:
-                Anim.Play("WallClimbIdle");
-                break;
-            case ECreatureState.Dash:
-                Anim.Play("DashLoop");
-                break;
+            case ECreatureState.Fall:   Anim.Play("JumpFall");  break;
+            case ECreatureState.Wall:   Anim.Play("WallClimbIdle"); break;
+            case ECreatureState.Dash:   Anim.Play("DashLoop");  break;
         }
     }
     #endregion
-
-    protected override void UpdateController()
-    {
-        base.UpdateController();
-    }
 
     #region State Pattern
     protected override void OnStateChange(ECreatureState brefore, ECreatureState after)
     {
         switch (after)
         {
-            case ECreatureState.Move:
-                break;
-            case ECreatureState.Jump:
-                break;
-            case ECreatureState.Fall:
-                break;
-            case ECreatureState.Dash:
-                break;
+            case ECreatureState.Move:   break;
+            case ECreatureState.Jump:   break;
+            case ECreatureState.Fall:   break;
+            case ECreatureState.Dash:   break;
 
             case ECreatureState.Idle:
             case ECreatureState.Wall:
@@ -191,10 +178,6 @@ public class Player : Creature
     protected override void UpdateMove()
     {
         base.UpdateMove();
-
-        // 하강
-        if (RigidBody.linearVelocityY < PlayerMovementData.MidToFallSpeedThreshold)
-            CreatureState = ECreatureState.Fall;
     }
 
     protected override void UpdateJump()

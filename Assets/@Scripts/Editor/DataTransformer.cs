@@ -38,6 +38,7 @@ public class DataTransformer : EditorWindow
 
         ParseExcelDataToJson<PlayerDataLoader, PlayerData>("Player");
         ParseExcelDataToJson<PlayerMovementDataLoader, PlayerMovementData>("PlayerMovement");
+        ParseExcelDataToJson<EnemyMovementDataLoader, EnemyMovementData>("EnemyMovement");
 
         Debug.Log("DataTransformer Completed");
     }

@@ -15,6 +15,12 @@ MonoBehaviour:
   m_GroupName: ScriptableObject
   m_GUID: 50a85e24683ad0a408dbef63cb3d0cf5
   m_SerializeEntries:
+  - m_GUID: 8e2b25c561caa064998b20ef164f0182
+    m_Address: MoveMentValues_Enemy
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - PreLoad
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 90f11b84e55d7ee4b815ae57095d4081
     m_Address: MoveMentValues_Player
     m_ReadOnly: 0

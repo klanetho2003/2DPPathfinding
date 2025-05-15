@@ -1,0 +1,16 @@
+﻿{
+  "MovementDatas": [
+    {
+      "PathUpdateInterval": 0.2,
+      "TemplateId": 10,
+      "MaxSpeed": 8.0,
+      "JumpForce": 8.0,
+      "JumpToMidSpeedThreshold": 1.5,
+      "MidToFallSpeedThreshold": -1.5,
+      "CoyoteTimeDuration": 0.1,
+      "DashSpeed": 15.0,
+      "DashDuration": 0.2,
+      "DashCoolTime": 2.0
+    }
+  ]
+}

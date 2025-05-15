@@ -7,9 +7,9 @@ public class Creature : BaseController
 {
     public CreatureData CreatureData { get; private set; }
     public CreatureMovementData CreatureMovementData { get; private set; }
-
     public MoveMentValues MovementValues { get; protected set; }
 
+    public Vector2 RawMoveInput { get { return _moveDir; } }
     public float TargetVelocityX { get; protected set; }
 
     protected float _lastGroundedTime; // 마지막으로 지면에 닿은 시점 to Coyote
@@ -30,33 +30,12 @@ public class Creature : BaseController
         }
     }
 
-    public Vector2 RawMoveInput { get { return _moveDir; } }
-
-    [SerializeField] // For Debug
-    protected bool _isGrounded = false;
-    public bool IsGrounded
-    {
-        get { return _isGrounded; }
-        protected set { _isGrounded = value; }
-    }
-
     public bool OnWall { get { return OnRightWall | OnLeftWall; } }
+    protected bool OnLeftWall = false;
+    protected bool OnRightWall = false;
 
-    [SerializeField] // For Debug
-    protected bool _onLeftWall = false;
-    public bool OnLeftWall
-    {
-        get { return _onLeftWall; }
-        protected set { _onLeftWall = value; }
-    }
-
-    [SerializeField] // For Debug
-    protected bool _onRightWall = false;
-    public bool OnRightWall
-    {
-        get { return _onRightWall; }
-        protected set { _onRightWall = value; }
-    }
+    protected bool IsGrounded = false;
+    protected LayerMask _groundLayer;
 
     [SerializeField] // For Debug
     ECreatureState _creatureState;
@@ -65,33 +44,24 @@ public class Creature : BaseController
         get { return _creatureState; }
         set
         {
-            if (_creatureState == value)
-                return;
-
+            if (_creatureState == value) return;
             OnStateChange(_creatureState, value);
-
             _creatureState = value;
-
             UpdateAnimation();
         }
     }
 
     #region Stat
-    float _hp;
-    public float Hp
-    {
-        get { return _hp; }
-        set { _hp = Mathf.Clamp(value, 0, MaxHp);}
-    }
     public float MaxHp { get; set; }
     public float MaxSpeed { get; set; }
     public float JumpForce { get; set; }
-    #endregion
 
-    #region Caching
-
-    protected LayerMask _groundLayer;
-
+    private float _hp;
+    public float Hp
+    {
+        get { return _hp; }
+        set { _hp = Mathf.Clamp(value, 0, MaxHp); }
+    }
     #endregion
 
     #region Init & SetInfo
@@ -104,7 +74,6 @@ public class Creature : BaseController
         RigidBody = GetComponent<Rigidbody2D>();
 
         _groundLayer = LayerMask.GetMask("Ground");
-        // _wallLayer = LayerMask.GetMask("Wall");
 
         return true;
     }
@@ -121,11 +90,14 @@ public class Creature : BaseController
         else
         {
             // To Do Others
-            CreatureData = Managers.Data.PlayerDataDic[templateID];
-            CreatureMovementData = Managers.Data.PlayerMovementDataDic[templateID];
+            CreatureData = Managers.Data.PlayerDataDic[templateID]; // Player랑 동일. Player랑 같은 Data Parsing
+            CreatureMovementData = Managers.Data.EnemyMovementDataDic[templateID];
         }
 
         gameObject.name = $"{CreatureData.TemplateId}_{CreatureData.NameDataId}"; // To Do : string data sheet
+
+        // Movement Data Load
+        MovementValues = Managers.Resource.Load<MoveMentValues>($"MoveMentValues_{ObjectType}");
 
         // Collider
         Collider.offset = new Vector2(CreatureData.ColliderOffsetX, CreatureData.ColliderOffsetY);
@@ -133,9 +105,6 @@ public class Creature : BaseController
 
         // RigidBody
         RigidBody.mass = 0;
-
-        // Material
-        // SpriteRenderer.material = Managers.Resource.Load<Material>(CreatureData.MaterialID);
 
         // Animatior
         SetAnimation(CreatureData.AnimDataId, CreatureData.SortingLayerName, SortingLayers.CREATURE);
@@ -165,53 +134,14 @@ public class Creature : BaseController
 
         switch (CreatureState)
         {
-            case ECreatureState.Idle:
-                UpdateIdle();
-                break;
-            case ECreatureState.Move:
-                UpdateMove();
-                break;
-            case ECreatureState.Jump:
-                UpdateJump();
-                break;
-            case ECreatureState.Fall:
-                UpdateFall();
-                break;
-            case ECreatureState.Wall:
-                UpdateWall();
-                break;
-            case ECreatureState.Dash:
-                UpdateDash();
-                break;
+            case ECreatureState.Idle:   UpdateIdle(); break;
+            case ECreatureState.Move:   UpdateMove(); break;
+            case ECreatureState.Jump:   UpdateJump(); break;
+            case ECreatureState.Fall:   UpdateFall(); break;
+            case ECreatureState.Wall:   UpdateWall(); break;
+            case ECreatureState.Dash:   UpdateDash(); break;
         }
     }
-
-    protected virtual void UpdateCoyoteTimer()
-    {
-        // 지면에 닿을 때마다 시간 리셋
-        if (IsGrounded == false)
-            return;
-
-        _lastGroundedTime = Time.time;
-    }
-
-    protected virtual void UpdateIdle()
-    {
-        if (MoveDir != Vector2.zero) { CreatureState = ECreatureState.Move; return; }
-    }
-    protected virtual void UpdateMove()
-    {
-        if (MoveDir == Vector2.zero) { CreatureState = ECreatureState.Idle; return; }
-    }
-    protected virtual void UpdateJump() { }
-    protected virtual void UpdateFall() { }
-    protected virtual void UpdateWall() { }
-    protected virtual void UpdateDash() { }
-
-    protected override void UpdateAnimation() { }
-
-    protected virtual void OnStateChange(ECreatureState brefore, ECreatureState after) { }
-    #endregion
 
     protected override void FixedUpdateController()
     {
@@ -232,6 +162,37 @@ public class Creature : BaseController
         // 공중에선 그대로 관성 유지
     }
 
+    protected virtual void UpdateCoyoteTimer()
+    {
+        // 지면에 닿을 때마다 시간 리셋
+        if (IsGrounded == false)
+            return;
+
+        _lastGroundedTime = Time.time;
+    }
+
+    protected virtual void UpdateIdle()
+    {
+        if (MoveDir != Vector2.zero) { CreatureState = ECreatureState.Move; return; }
+    }
+    protected virtual void UpdateMove()
+    {
+        if (MoveDir == Vector2.zero) { CreatureState = ECreatureState.Idle; return; }
+
+        // 하강
+        if (RigidBody.linearVelocityY < CreatureMovementData.MidToFallSpeedThreshold)
+            CreatureState = ECreatureState.Fall;
+    }
+    protected virtual void UpdateJump() { }
+    protected virtual void UpdateFall() { }
+    protected virtual void UpdateWall() { }
+    protected virtual void UpdateDash() { }
+
+    protected override void UpdateAnimation() { }
+
+    protected virtual void OnStateChange(ECreatureState brefore, ECreatureState after) { }
+    #endregion
+
     #region Move Method
     protected virtual void UpdateGrounded()
     {
@@ -244,12 +205,12 @@ public class Creature : BaseController
         return hit;
     }
 
-    private float velocityXSmoothing;
+    private float _velocityXSmooth;
     private void CalculateTargetVelocity()
     {
         float accelTime = IsGrounded ? MovementValues.groundAccelTime : MovementValues.airAccelTime;
         float targetSpeed = RawMoveInput.x * MaxSpeed;
-        TargetVelocityX = Mathf.SmoothDamp(RigidBody.linearVelocityX, targetSpeed, ref velocityXSmoothing, accelTime);
+        TargetVelocityX = Mathf.SmoothDamp(RigidBody.linearVelocityX, targetSpeed, ref _velocityXSmooth, accelTime);
     }
 
     public virtual void SetRigidBodyVelocity(float velocity)
@@ -295,51 +256,14 @@ public class Creature : BaseController
 
     #endregion
 
-    #region Map
-    public EFindPathResult FindPathAndMoveToCellPos(Vector3 destWorldPos, int maxDepth, bool forceMoveCloser = false)
+    #region Helper
+    protected bool IsGroundedWithCoyote()
     {
-        Vector3Int destCellPos = Managers.Map.World2Cell(destWorldPos);
-        return FindPathAndMoveToCellPos(destCellPos, maxDepth, forceMoveCloser);
+        return IsGrounded || (Time.time - _lastGroundedTime <= CreatureMovementData.CoyoteTimeDuration);
     }
-
-    public EFindPathResult FindPathAndMoveToCellPos(Vector3Int destCellPos, int maxDepth, bool forceMoveCloser = false)
-    {
-        if (LerpCellPosCompleted == false)
-            return EFindPathResult.Fail_LerpCell;
-
-        // A*
-        List<Vector3Int> path = Managers.Map.FindPath(this, CellPos, destCellPos, maxDepth);
-        if (path.Count < 2)
-            return EFindPathResult.Fail_NoPath;
-
-        if (forceMoveCloser)
-        {
-            Vector3Int diff1 = CellPos - destCellPos;
-            Vector3Int diff2 = path[1] - destCellPos;
-            if (diff1.sqrMagnitude <= diff2.sqrMagnitude)
-                return EFindPathResult.Fail_NoPath;
-        }
-
-        Vector3Int dirCellPos = path[1] - CellPos;
-        //
-        Vector3Int nextPos = CellPos + dirCellPos;
-
-        if (Managers.Map.MoveTo(this, nextPos) == false)
-            return EFindPathResult.Fail_MoveTo;
-
-        return EFindPathResult.Success;
-    }
-
-    /*public bool MoveToCellPos(Vector3Int destCellPos, int maxDepth, bool forceMoveCloser = false)
-    {
-        if (LerpCellPosCompleted == false)
-            return false;
-
-        return Managers.Map.MoveTo(this, destCellPos);
-    }*/
     #endregion
 
-    #if UNITY_EDITOR
+#if UNITY_EDITOR
     // Gizmo to Debug
     void OnDrawGizmos()
     {
@@ -353,11 +277,4 @@ public class Creature : BaseController
         Gizmos.DrawLine(_onWallCheck_LineRight_StartPos, _onWallCheck_LineRight_StartPos + Vector2.right * 0.1f);
     }
     #endif
-
-    #region Helper
-    protected bool IsGroundedWithCoyote()
-    {
-        return IsGrounded || (Time.time - _lastGroundedTime <= CreatureMovementData.CoyoteTimeDuration);
-    }
-    #endregion
 }

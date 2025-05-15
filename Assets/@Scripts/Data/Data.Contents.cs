@@ -117,5 +117,25 @@ namespace Data
             return dict;
         }
     }
+
+
+    [Serializable]
+    public class EnemyMovementData : CreatureMovementData
+    {
+        public float PathUpdateInterval = 0.2f; // 길찾기 갱신 주기
+    }
+
+    [Serializable]
+    public class EnemyMovementDataLoader : ILoader<int, EnemyMovementData>
+    {
+        public List<EnemyMovementData> MovementDatas = new List<EnemyMovementData>();
+        public Dictionary<int, EnemyMovementData> MakeDict()
+        {
+            Dictionary<int, EnemyMovementData> dict = new Dictionary<int, EnemyMovementData>();
+            foreach (EnemyMovementData data in MovementDatas)
+                dict.Add(data.TemplateId, data);
+            return dict;
+        }
+    }
     #endregion
 }
