@@ -130,7 +130,7 @@ namespace MapHelper
 
     public static class TileMapBuilder
     {
-        public static TileMapData Build(List<Cell> cells, float jumpRadius = 4f)
+        public static TileMapData Build(List<Cell> cells)
         {
             var graph = new TileMapData { Cells = cells };
 
@@ -169,7 +169,7 @@ namespace MapHelper
                         Vector3Int toPos = new Vector3Int(to.x, to.y);
                         float sqrDist = (toPos - fromPos).sqrMagnitude; // Tile to Tile 거리 계산
 
-                        if (sqrDist <= jumpRadius * jumpRadius)
+                        if (sqrDist <= from.requiredJumpPower * from.requiredJumpPower)
                         {
                             // 사이 타일 검사
                             if (!HasBlockedBetween(fromPos, toPos, cellMap))

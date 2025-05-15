@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: 45bbf03521f9bb8409c78afe88f14bc6
+guid: 57f66c3848afb9f44b5ed2b75442a96d
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 2648609171038975935
-    second: terrain_Up_0
+      213: -4579854809409368799
+    second: terrain_Up_J4_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -113,7 +113,7 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: terrain_Up_0
+      name: terrain_Up_J4_0
       rect:
         serializedVersion: 2
         x: 0
@@ -128,8 +128,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: fb7be941200c1c420800000000000000
-      internalID: 2648609171038975935
+      spriteID: 12d4a42e0561170c0800000000000000
+      internalID: -4579854809409368799
       vertices: []
       indices: 
       edges: []
@@ -148,7 +148,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      terrain_Up_0: 2648609171038975935
+      terrain_Up_J4_0: -4579854809409368799
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

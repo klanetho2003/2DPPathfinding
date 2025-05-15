@@ -230,9 +230,6 @@ public class Creature : BaseController
             ApplyGroundFriction();
         }
         // 공중에선 그대로 관성 유지
-
-        // 2. Better Jump: 강화 낙하 & 가변 점프 높이
-        ApplyBetterJump();
     }
 
     #region Move Method
@@ -274,22 +271,6 @@ public class Creature : BaseController
         RigidBody.linearVelocity += dir * force;
 
         CreatureState = ECreatureState.Jump;
-    }
-
-    protected virtual void ApplyBetterJump()
-    {
-        if (IsGrounded)
-            return;
-
-        float vy = RigidBody.linearVelocityY;
-        float multiplier = 1f;
-
-        // 빠른 낙하
-        if (vy < 0f)
-            multiplier = MovementValues.fallMultiplier;
-
-        // 적용
-        RigidBody.linearVelocity = Vector2.up * Physics2D.gravity.y * (multiplier - 1f) * Time.fixedDeltaTime;
     }
     #endregion
 

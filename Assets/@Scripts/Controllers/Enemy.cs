@@ -103,11 +103,7 @@ public class Enemy : Creature
 
     protected override void UpdateFall()
     {
-        // Wall 구현은 생각해볼 것
-        /*if (OnWall && RawMoveInput != Vector2.zero)
-            CreatureState = ECreatureState.Wall;
-
-        else */if (IsGrounded)
+        if (IsGrounded)
             CreatureState = ECreatureState.Idle;
     }
 
@@ -125,6 +121,7 @@ public class Enemy : Creature
             UpdatePath();
         }
 
+        // 점프 필요 여부 확인 및 값 세팅
         MoveAlongPath();
 
         // 점프 실행 조건 최종 확인
@@ -186,6 +183,7 @@ public class Enemy : Creature
 
         Vector3Int current = Managers.Map.World2Cell(transform.position);
 
+        // 최종 목적지에 도착 -> 빠른 탈출
         if (_pathIndex >= _pathCells.Count)
         {
             _pathCells.Clear();
@@ -193,9 +191,11 @@ public class Enemy : Creature
             return;
         }
 
+        // Node 이동 완료, Next Path 정의
         if (current == _pathCells[_pathIndex])
         {
             _pathIndex++;
+            // Check
             if (_pathIndex >= _pathCells.Count)
             {
                 _pathCells.Clear();
@@ -203,6 +203,7 @@ public class Enemy : Creature
                 return;
             }
 
+            // Next Path Setting
             CellPos = _pathCells[_pathIndex];
         }
 
@@ -213,8 +214,7 @@ public class Enemy : Creature
         // 점프 간선 확인 → 점프 예약
         if (Managers.Map.TryGetEdge(current, _pathCells[_pathIndex], out var edge) &&
             edge.edgeType == EdgeType.Jump &&
-            CreatureMovementData.JumpForce >= edge.cost &&
-            IsGrounded)
+            CreatureMovementData.JumpForce >= edge.cost)
         {
             // 예약만 (방향 + 점프력 저장)
             _shouldJump = true;

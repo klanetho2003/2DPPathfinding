@@ -91,8 +91,8 @@ public class Define
         Dummy1 = 3,
         Water = 4,
         UI = 5,
-        Ground = 6,
-        Creature = 7,
+        Creature = 6,
+        Ground = 10
     }
 
     public enum EFindPathResult

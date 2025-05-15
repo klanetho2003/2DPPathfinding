@@ -114,20 +114,18 @@ public class Player : Creature
     {
         base.FixedUpdateController();
 
+        // Better Jump: 강화 낙하 & 가변 점프 높이
+        ApplyBetterJump();
+
         if (CreatureState == ECreatureState.Dash)
             RigidBody.linearVelocity = _dashDirection * PlayerMovementData.DashSpeed;
     }
 
     protected override void UpdateGrounded()
     {
-        RaycastHit2D hit = Physics2D.Raycast(transform.position, Vector2.down, 0.1f, _groundLayer);
+        base.UpdateGrounded();
 
-        IsGrounded = hit;
-
-        // CellPos Change
-        if (IsGrounded == false) return;
-
-        Vector3Int CellPos = Managers.Map.World2Cell(hit.point);
+        Vector3Int CellPos = Managers.Map.World2Cell(transform.position);
 
         Managers.Map.MoveTo(this, CellPos);
     }
@@ -298,7 +296,7 @@ public class Player : Creature
         base.DoJump(dir, force);
     }
 
-    protected override void ApplyBetterJump()
+    private void ApplyBetterJump()
     {
         if (IsGrounded)
             return;

@@ -15,7 +15,7 @@ GameObject:
   - component: {fileID: 6046028211287650346}
   - component: {fileID: 7395126110033174652}
   - component: {fileID: -7189099738779650045}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Enemy
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -164,8 +164,8 @@ SortingGroup:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 6711443105500476187}
   m_Enabled: 1
-  m_SortingLayerID: 0
-  m_SortingLayer: 0
+  m_SortingLayerID: 1593501089
+  m_SortingLayer: 1
   m_SortingOrder: 0
   m_SortAtRoot: 0
 --- !u!95 &7395126110033174652
@@ -202,7 +202,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bb57318ea7b5b9a4fb2d8ecad2a94594, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _cellPos: {x: 0, y: 0, z: 0}
   _isGrounded: 0
   _onLeftWall: 0
   _onRightWall: 0
   _creatureState: 0
+  _shouldJump: 0
+  _jumpDir: {x: 0, y: 0}
