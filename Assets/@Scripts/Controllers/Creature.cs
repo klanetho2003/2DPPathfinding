@@ -235,7 +235,13 @@ public class Creature : BaseController
     #region Move Method
     protected virtual void UpdateGrounded()
     {
-        IsGrounded  = Physics2D.Raycast(transform.position, Vector2.down, 0.1f, _groundLayer);
+        IsGrounded = CheckGround();
+    }
+
+    protected virtual RaycastHit2D CheckGround()
+    {
+        RaycastHit2D hit = Physics2D.Raycast(transform.position, Vector2.down, 0.1f, _groundLayer);
+        return hit;
     }
 
     private float velocityXSmoothing;

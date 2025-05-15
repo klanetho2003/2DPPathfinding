@@ -74,7 +74,7 @@ public class Define
         None = -1,
         HorizontalOnly = 0,
         Jumpable = 1,
-        DeadEnd = 2
+        Obstacle = 2
     }
 
     public enum EdgeType

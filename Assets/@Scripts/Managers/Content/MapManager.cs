@@ -154,7 +154,7 @@ namespace MapHelper
                 Cell from = cells[i];
                 Vector3Int fromPos = new Vector3Int(from.x, from.y);
 
-                if (from.TileType == ETileType.DeadEnd)
+                if (from.TileType == ETileType.Obstacle)
                     continue;
 
                 if (from.TileType == ETileType.Jumpable)
@@ -187,7 +187,7 @@ namespace MapHelper
                     // Jumpable(from) <-> Jumpable(to) 사이에 HorizontalOnly가 끼어있으면 연결 금지
                     if (cellMap.TryGetValue(neighbor, out Cell to))
                     {
-                        if (to.TileType == ETileType.DeadEnd)
+                        if (to.TileType == ETileType.Obstacle)
                             continue;
 
                         bool isBetweenBlocked = false;
@@ -230,7 +230,7 @@ namespace MapHelper
                 Vector3Int checkPos = fromPos + new Vector3Int(dx * i, dy * i);
                 if (cellMap.TryGetValue(checkPos, out Cell midCell))
                 {
-                    if (midCell.TileType == ETileType.HorizontalOnly)
+                    if (midCell.TileType == ETileType.HorizontalOnly || midCell.TileType == ETileType.Obstacle)
                         return true; // 막힘
                 }
             }
@@ -485,21 +485,14 @@ public class MapManager
                         continue;
                 }
 
+                // Horizontal 전용 - 수평이면서 갈 수 있는지 확인
                 if (edge.edgeType == EdgeType.Horizontal)
                 {
-                    if (!CanGo(self, next))
+                    if (CanGo(self, next) == false)
                         continue;
                 }
 
-                // === 점수 조정 ===
-                int penalty = 0;
-                switch (edge.edgeType)
-                {
-                    case EdgeType.Jump: penalty = 1; break;
-                    case EdgeType.Horizontal: penalty = 0; break;
-                }
-
-                int h = (destCellPos - next).sqrMagnitude + penalty;
+                int h = (destCellPos - next).sqrMagnitude;
 
                 if (best.TryGetValue(next, out int oldH) && oldH <= h)
                     continue;

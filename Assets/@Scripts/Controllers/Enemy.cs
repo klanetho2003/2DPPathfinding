@@ -17,9 +17,10 @@ public class Enemy : Creature
 
     [SerializeField]
     private bool _shouldJump = false;
-    [SerializeField]
     private Vector2 _jumpDir = Vector2.zero;
     private float _jumpPower = 0f;
+    [SerializeField]
+    Vector3Int _stepPos = Vector3Int.zero;
 
     public override bool Init()
     {
@@ -127,10 +128,9 @@ public class Enemy : Creature
         // 점프 실행 조건 최종 확인
         if (_shouldJump && _pathCells != null && _pathIndex < _pathCells.Count)
         {
-            Vector3Int groundCell = Managers.Map.World2Cell(transform.position);
             Vector3Int jumpTargetCell = _pathCells[_pathIndex];
 
-            if (jumpTargetCell.y > groundCell.y)
+            if (jumpTargetCell.y > _stepPos.y)
             {
                 DoJump(_jumpDir, _jumpPower);
                 _shouldJump = false;
@@ -153,10 +153,10 @@ public class Enemy : Creature
             return;
 
         // 점프 파워를 절대 속도로 환산
-        float jumpVelocity = Mathf.Sqrt(2f * force * Mathf.Abs(Physics2D.gravity.y));
+        float jumpVelocity = Mathf.Sqrt(1.8f * force * Mathf.Abs(Physics2D.gravity.y));
 
         // 점프 방향 보정 (X는 부드럽게, Y는 고정 상향)
-        Vector2 jumpVec = new Vector2(dir.x * 0.7f, 1f).normalized * jumpVelocity;
+        Vector2 jumpVec = new Vector2(dir.x * 0.4f, 1f).normalized * jumpVelocity;
 
         // 기존 수직 속도 제거 후 직접 세팅
         RigidBody.linearVelocity = new Vector2(jumpVec.x, jumpVec.y);
@@ -181,7 +181,10 @@ public class Enemy : Creature
         if (_pathCells == null || _pathCells.Count == 0)
             return;
 
-        Vector3Int current = Managers.Map.World2Cell(transform.position);
+        // 현재 self 위치 정의
+        RaycastHit2D hit = CheckGround();
+        Vector2 stepPos = (hit == true) ? hit.point : transform.position;
+        _stepPos = Managers.Map.World2Cell(stepPos);
 
         // 최종 목적지에 도착 -> 빠른 탈출
         if (_pathIndex >= _pathCells.Count)
@@ -192,7 +195,7 @@ public class Enemy : Creature
         }
 
         // Node 이동 완료, Next Path 정의
-        if (current == _pathCells[_pathIndex])
+        if (_stepPos == _pathCells[_pathIndex])
         {
             _pathIndex++;
             // Check
@@ -212,7 +215,7 @@ public class Enemy : Creature
         MoveDir = new Vector3(Mathf.Sign(dir.x), 0, 0);
 
         // 점프 간선 확인 → 점프 예약
-        if (Managers.Map.TryGetEdge(current, _pathCells[_pathIndex], out var edge) &&
+        if (Managers.Map.TryGetEdge(_stepPos, _pathCells[_pathIndex], out var edge) &&
             edge.edgeType == EdgeType.Jump &&
             CreatureMovementData.JumpForce >= edge.cost)
         {
@@ -226,7 +229,7 @@ public class Enemy : Creature
         }
     }
 
-#if UNITY_EDITOR
+    #if UNITY_EDITOR
     private void OnDrawGizmosSelected()
     {
         if (_pathCells == null) return;

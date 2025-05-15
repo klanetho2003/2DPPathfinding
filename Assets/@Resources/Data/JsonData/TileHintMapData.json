@@ -369,7 +369,7 @@
             },
             "x": 6,
             "y": -5,
-            "TileType": 0,
+            "TileType": 2,
             "requiredJumpPower": 0.0
         },
         {
@@ -393,7 +393,7 @@
             },
             "x": 8,
             "y": -5,
-            "TileType": 0,
+            "TileType": 2,
             "requiredJumpPower": 0.0
         },
         {
