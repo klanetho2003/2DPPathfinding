@@ -6,7 +6,7 @@ using static Define;
 using System.IO;
 using System.Linq;
 
-#region Find Path
+#region Parse Map Data
 namespace MapHelper
 {
     [Serializable]
@@ -441,8 +441,9 @@ public class MapManager
     public List<Vector3Int> FindPath(Creature self, Vector3Int startCellPos, Vector3Int destCellPos, int maxDepth = 20)
     {
         var tileMap = TileMapData;
-        if (!tileMap.EdgeMap.ContainsKey(startCellPos))
-            return new List<Vector3Int>();
+
+        if (!tileMap.CellMap.ContainsKey(destCellPos))
+            return new List<Vector3Int>(); // 유효한 목적지가 아님
 
         Dictionary<Vector3Int, int> best = new();
         Dictionary<Vector3Int, Vector3Int> parent = new();
@@ -484,14 +485,21 @@ public class MapManager
                         continue;
                 }
 
-                // Horizontal 전용 - 수평이면서 갈 수 있는지 확인
                 if (edge.edgeType == EdgeType.Horizontal)
                 {
-                    if (CanGo(self, next) == false)
+                    if (!CanGo(self, next))
                         continue;
                 }
 
-                int h = (destCellPos - next).sqrMagnitude;
+                // === 점수 조정 ===
+                int penalty = 0;
+                switch (edge.edgeType)
+                {
+                    case EdgeType.Jump: penalty = 1; break;
+                    case EdgeType.Horizontal: penalty = 0; break;
+                }
+
+                int h = (destCellPos - next).sqrMagnitude + penalty;
 
                 if (best.TryGetValue(next, out int oldH) && oldH <= h)
                     continue;
@@ -511,6 +519,7 @@ public class MapManager
         if (parent.ContainsKey(destCellPos))
             return CalcCellPathFromParent(parent, destCellPos);
 
+        // 목적지에 도달하지 못했더라도 가장 가까운 셀 반환
         return CalcCellPathFromParent(parent, closestCell);
     }
 
@@ -519,9 +528,17 @@ public class MapManager
         List<Vector3Int> path = new();
         if (!parent.ContainsKey(dest)) return path;
 
+        HashSet<Vector3Int> visited = new(); // 순환 방지
+
         Vector3Int current = dest;
-        while (parent[current] != current)
+        while (parent.ContainsKey(current) && parent[current] != current)
         {
+            if (!visited.Add(current))
+            {
+                Debug.LogWarning("Loop detected in path trace!");
+                break; // 순환 발생 시 중단
+            }
+
             path.Add(current);
             current = parent[current];
         }
